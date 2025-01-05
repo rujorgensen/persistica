@@ -1,0 +1,22 @@
+{
+  "bin": {
+    "persistica": "index.js"
+  },
+  "name": "persistica",
+  "version": "0.0.0",
+  "description": "Persistica",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rujorgensen/persistica.git"
+  },
+  "author": "pixl.prophet",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rujorgensen/persistica/issues"
+  },
+  "homepage": "https://github.com/rujorgensen/persistica#readme"
+}
