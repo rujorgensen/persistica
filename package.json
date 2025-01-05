@@ -1,0 +1,31 @@
+{
+  "bin": {
+    "persistica": "index.js"
+  },
+  "type": "module",
+  "name": "persistica",
+  "version": "0.0.0",
+  "description": "Persistica",
+  "main": "./index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rujorgensen/persistica.git"
+  },
+  "author": "pixl.prophet",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rujorgensen/persistica/issues"
+  },
+  "homepage": "https://github.com/rujorgensen/persistica#readme",
+  "dependencies": {
+    "yargs": "^17.7.2",
+    "ws": "8.18.0"
+  },
+  "devDependencies": {
+    "@types/ws": "8.5.12",
+    "jest": "29.7.0"
+  }
+}

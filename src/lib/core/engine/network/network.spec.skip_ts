@@ -1,0 +1,227 @@
+import { Network } from './network.class';
+import { IDeleted, INetworkState } from './network.interfaces';
+import { connectNewClient, connectKnownClient } from './_test/helpers.utils';
+import { of } from 'rxjs';
+import { NetworkStore } from '../stores/network.store';
+
+const networkKey: string = '5eCr3TnetworkKey$';
+
+const networkStoreMock = (
+    networkState: INetworkState
+): NetworkStore => ({
+    read$$: (
+
+    ) => {
+        return of(networkState);
+    },
+}) as NetworkStore;
+
+
+describe('network', () => {
+
+    beforeAll(() => {
+        jest
+            .useFakeTimers()
+            .setSystemTime(new Date('2020-01-01'));
+    });
+
+    // ******************************************************************************
+    // *** Join
+    // ******************************************************************************
+    it.only('should allow a known client to connect to an existing network', () => {
+        const [netWorkA, netWorkB] = connectKnownClient();
+
+        // expect(netWorkB.connectedClients.find((peer) => peer.clientId === 'ci-clientA')).toBeDefined();
+        // expect(netWorkA.connectedClients.find((peer) => peer.clientId === 'ci-clientB')).toBeDefined();
+        expect(netWorkA.networkState).toStrictEqual({
+            deletes: [],
+            knownPeers: [
+                {
+                    clientId: 'ci-clientB',
+                    lastSeenAt: new Date('2020-01-01T00:00:00.000Z'),
+                }
+            ],
+            version: 1,
+        });
+
+        expect(netWorkB.networkState).toStrictEqual({
+            deletes: [],
+            knownPeers: [
+                {
+                    clientId: 'ci-clientA',
+                    lastSeenAt: new Date('2020-01-01T00:00:00.000Z'),
+                }
+            ],
+            version: 1,
+        });
+    });
+
+    it.only('should allow a new client to connect to an existing network, with the key', () => {
+        const [netWorkA, netWorkB] = connectNewClient();
+
+        // expect(netWorkB.connectedClients.find((peer) => peer.clientId === 'ci-clientA')).toBeDefined();
+        // expect(netWorkA.connectedClients.find((peer) => peer.clientId === 'ci-clientB')).toBeDefined();
+        expect(netWorkA.networkState).toStrictEqual({
+            version: 1,
+            deletes: [],
+            knownPeers: [
+                {
+                    clientId: 'ci-clientB',
+                    lastSeenAt: new Date('2020-01-01T00:00:00.000Z'),
+                }
+            ],
+        });
+
+        expect(netWorkB.networkState).toStrictEqual({
+            version: 1,
+            deletes: [],
+            knownPeers: [
+                {
+                    clientId: 'ci-clientA',
+                    lastSeenAt: new Date('2020-01-01T00:00:00.000Z'),
+                }
+            ],
+        });
+    });
+    it.only('should not allow a new client to connect to an existing network, without the key', () => {
+        // const netWorkId: TNetworkId = 'ni-3k_?';
+        const netWorkA: Network = new Network(
+            'ci-clientA',
+            'unknown-network-key',
+            networkStoreMock({
+                version: 1,
+                knownPeers: [],
+                deletes: [],
+            }),
+        );
+
+        const netWorkB: Network = new Network(
+            'ci-clientB',
+            'true-network-key',
+            networkStoreMock({
+                version: 1,
+                knownPeers: [],
+                deletes: [],
+            }),
+        );
+
+        netWorkA.joinNetworkAttempt('ci-clientB', netWorkB.joinRequest.bind(netWorkB));
+
+        // expect(netWorkB.connectedClients.find((peer) => peer.clientId === 'ci-clientA')).not.toBeDefined();
+        // expect(netWorkA.connectedClients.find((peer) => peer.clientId === 'ci-clientB')).not.toBeDefined();
+        expect(netWorkA.networkState).toStrictEqual({
+            version: 1,
+            deletes: [],
+            knownPeers: [],
+        });
+
+        expect(netWorkB.networkState).toStrictEqual({
+            version: 1,
+            deletes: [],
+            knownPeers: [],
+        });
+    });
+
+    // ******************************************************************************
+    // *** Synchronizing Deletes
+    // ******************************************************************************
+    it.only('should sync deletes, if the client is known', () => {
+        const [netWorkA, netWorkB] = connectKnownClient(
+            // Client A
+            [
+                {
+                    cuid: 'cuid_dsadsa',
+                    synchronizedWith: [
+                        'ci-clientT'
+                    ],
+                }
+            ],
+
+            // Client B
+            [
+                {
+                    cuid: 'cuid_123',
+                    synchronizedWith: [
+                        'ci-clientB'
+                    ],
+                }
+            ],
+        );
+
+        const expectedDeletes: IDeleted[] = [
+            {
+                cuid: 'cuid_123',
+                synchronizedWith: [
+                    'ci-clientA',
+                    'ci-clientB',
+                ],
+            },
+            {
+                cuid: 'cuid_dsadsa',
+                synchronizedWith: [
+                    'ci-clientA',
+                    'ci-clientB',
+                    'ci-clientT',
+                ],
+            },
+        ];
+
+        expect(netWorkA.networkState?.deletes).toStrictEqual(expectedDeletes);
+        expect(netWorkB.networkState?.deletes).toStrictEqual(expectedDeletes);
+    });
+
+    it('should mark all elements as synched with client A, if the client is new', () => {
+        const [netWorkA, netWorkB] = connectNewClient(
+            // Client A (only exists on A, do not sync with network)
+            [
+                {
+                    cuid: 'cuid_dsadsa',
+                    synchronizedWith: [],
+                }
+            ],
+
+            // Client B
+            [
+                {
+                    cuid: 'cuid_123',
+                    synchronizedWith: [
+                        'ci-clientB'
+                    ],
+                }
+            ],
+        );
+
+        const expectedDeletes: IDeleted[] = [
+            {
+                cuid: 'cuid_dsadsa',
+                synchronizedWith: [
+                    'ci-clientA',
+                    'ci-clientB',
+                ],
+            },
+        ];
+
+        expect(netWorkA.networkState?.deletes).toStrictEqual(expectedDeletes);
+        expect(netWorkB.networkState?.deletes).toStrictEqual(expectedDeletes);
+    });
+
+    it('should not sync deletes, if the network is new', () => { });
+
+    // ******************************************************************************
+    // *** Synchronizing
+    // ******************************************************************************
+    it('should copy all data from client A to B and B to A, if the client is new', () => {
+
+    });
+
+    it('should copy all data from client A to B and B to A, if the network is new', () => {
+
+    });
+
+    // ******************************************************************************
+    // *** Synchronized
+    // ******************************************************************************
+    it('should be synchronized at the end of handshaking', () => {
+
+    });
+});
