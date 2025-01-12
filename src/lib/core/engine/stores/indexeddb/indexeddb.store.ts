@@ -1,4 +1,4 @@
-import { PersistenceWrapper, TLocalStoreState } from '../../persistence.wrapper';
+import type { PersistenceWrapper, TLocalStoreState } from '../../persistence.wrapper';
 import {
     type Observable,
     BehaviorSubject,
@@ -7,12 +7,12 @@ import {
 import objectHash from 'object-hash';
 import { hashTables } from '../indexeddb/hash.utils';
 import { hashAll } from '../_utils/db.class';
-import { TDateAsString } from '../../../data-types/filter.interfaces';
-import { filterNil } from '../../../../../../../../shared/classes/src';
-import { TDataType } from '../../synchronizer/synchronizer-state-detector.fn';
+import type { TDateAsString } from '../../../data-types/filter.interfaces';
+import { filterNil } from '../../../../utils/rxjs';
+import type { TDataType } from '../../synchronizer/synchronizer-state-detector.fn';
 import { ListenerHandler } from '../listeners.class';
 import { IGNORED_TABLE_NAMES } from '../_utils/ignored-table-names.const';
-import { TDataParsers, TGenericTableName, TUniqueIdentifier } from '../../_types/element.type';
+import type { TDataParsers, TGenericTableName, TUniqueIdentifier } from '../../_types/element.type';
 
 const DATABASE_NAME = 'PERSISTICA' as const;
 const DATABASE_VERSION = 6 as const;

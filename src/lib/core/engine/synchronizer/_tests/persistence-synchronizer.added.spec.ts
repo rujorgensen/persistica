@@ -1,8 +1,8 @@
 import {
     compareArrays,
 } from '../synchronize.fn';
-import {
-    type TDataType,
+import type {
+    TDataType,
 } from '../synchronizer-state-detector.fn';
 import {
     addHash

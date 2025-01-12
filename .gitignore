@@ -1,6 +1,6 @@
 # Workspace
-/node_modules
-/dist
+node_modules
+dist
 
 # IDE and Editor settings
 .vscode/

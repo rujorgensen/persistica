@@ -1,4 +1,4 @@
-import { INetworkState } from './network.interfaces';
+import type { INetworkState } from './network.interfaces';
 
 export abstract class NetworkServer {
     public abstract listen(): void;

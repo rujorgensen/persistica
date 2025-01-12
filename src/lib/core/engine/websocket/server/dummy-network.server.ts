@@ -1,5 +1,5 @@
-import { NetworkServer } from '../../network/abstract-network.server';
-import { INetworkState } from '../../network/network.interfaces';
+import type { NetworkServer } from '../../network/abstract-network.server';
+import type { INetworkState } from '../../network/network.interfaces';
 
 export class DummyNetworkServer implements NetworkServer {
 

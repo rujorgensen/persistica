@@ -1,5 +1,5 @@
 import { compareArrays } from "../synchronize.fn";
-import { TDataType } from "../synchronizer-state-detector.fn";
+import type { TDataType } from "../synchronizer-state-detector.fn";
 import { addHash } from "./helpers";
 
 const localClientId: string = 'local-client-id';

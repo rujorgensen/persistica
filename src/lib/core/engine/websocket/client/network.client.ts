@@ -1,10 +1,10 @@
-import { BehaviorSubject, filter, Observable } from 'rxjs';
-import { NetworkClient } from '../../network/abstract-network.client';
-import { NetworkHostInterface } from '../../network/network-client-interface.class';
-import { INetworkState } from '../../network/network.interfaces';
-import { PersisticaWebsocketClient } from '../websocket.client';
-import { TDataType } from '../../synchronizer/synchronizer-state-detector.fn';
-import { TUniqueIdentifier } from '../../_types/element.type';
+import { BehaviorSubject, filter, type Observable } from 'rxjs';
+import type { NetworkClient } from '../../network/abstract-network.client';
+import type { NetworkHostInterface } from '../../network/network-client-interface.class';
+import type { INetworkState } from '../../network/network.interfaces';
+import type { PersisticaWebsocketClient } from '../websocket.client';
+import type { TDataType } from '../../synchronizer/synchronizer-state-detector.fn';
+import type { TUniqueIdentifier } from '../../_types/element.type';
 
 /**
  * Filters off NULL and undefined, and provides type safety of type T.

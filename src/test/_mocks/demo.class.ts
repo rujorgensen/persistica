@@ -6,20 +6,20 @@ import {
     switchMap,
 } from 'rxjs';
 import { DemoModel } from './demo.model';
-import { DemoInterface } from './demo.interface';
-import { Network, THandshakeState } from '../../lib/core/engine/network/network.class';
-import { PersisticaWebsocketClient, TConnectionState } from '../../lib/core/engine/websocket/websocket.client';
-import { TClientId } from '../../lib/core/engine/network/network.interfaces';
-import { NetworkHostInterface } from '../../lib/core/engine/network/network-client-interface.class';
+import type { DemoInterface } from './demo.interface';
+import { Network, type THandshakeState } from '../../lib/core/engine/network/network.class';
+import { PersisticaWebsocketClient, type TConnectionState } from '../../lib/core/engine/websocket/websocket.client';
+import type { TClientId } from '../../lib/core/engine/network/network.interfaces';
+import type { NetworkHostInterface } from '../../lib/core/engine/network/network-client-interface.class';
 import {
+    type TDateAsString,
+    type TLocalStoreState,
+    type TSynchronizerState,
     DummyNetworkServer,
     IndexedDBStore,
     NetworkStore,
     NetworkWebsocketClient,
     Synchronizer,
-    TDateAsString,
-    TLocalStoreState,
-    TSynchronizerState,
 } from '@persistica/core';
 
 export const instantiate = (

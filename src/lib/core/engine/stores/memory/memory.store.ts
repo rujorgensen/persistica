@@ -6,12 +6,12 @@ import {
     map,
 } from 'rxjs';
 import { ListenerHandler } from '../listeners.class';
-import { PersistenceWrapper, TLocalStoreState } from '../../persistence.wrapper';
+import type { PersistenceWrapper, TLocalStoreState } from '../../persistence.wrapper';
 import { hashAll } from '../_utils/db.class';
 import { hashTables } from './hash.utils';
-import {
-    type TTableDefinition,
-    type TUniqueIdentifier,
+import type {
+    TTableDefinition,
+    TUniqueIdentifier,
     TDatabaseTableDefinition,
 } from '../../_types/element.type';
 

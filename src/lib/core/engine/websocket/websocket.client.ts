@@ -2,8 +2,8 @@ import { BehaviorSubject, map, type Observable } from 'rxjs';
 import type { TChannel, TMessage } from './shared/websocket.interfaces';
 import type { TLocalStoreState } from '../persistence.wrapper';
 import { RPCClient } from './rpc/rpc-client.class';
-import { IRegisterFunctions } from '../network/network-client-interface.class';
-import { TDataType } from '../synchronizer/synchronizer-state-detector.fn';
+import type { IRegisterFunctions } from '../network/network-client-interface.class';
+import type { TDataType } from '../synchronizer/synchronizer-state-detector.fn';
 
 export type TConnectionState = 'disconnected' | 'connecting' | 'connected';
 

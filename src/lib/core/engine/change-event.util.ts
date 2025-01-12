@@ -17,7 +17,7 @@ import {
     distinctUntilChanged,
     NEVER,
 } from 'rxjs';
-import { TUniqueIdentifier } from './_types/element.type';
+import type { TUniqueIdentifier } from './_types/element.type';
 
 export interface IChangeSource<T> {
     onCreate$$: Observable<T | ReadonlyArray<T>>,

@@ -11,11 +11,11 @@ import {
     take,
     tap,
 } from 'rxjs';
-import { TLocalStoreState } from '../persistence.wrapper';
-import { NetworkHostInterface } from '../network/network-client-interface.class';
-import { TDataType } from './synchronizer-state-detector.fn';
+import type { TLocalStoreState } from '../persistence.wrapper';
+import type { NetworkHostInterface } from '../network/network-client-interface.class';
+import type { TDataType } from './synchronizer-state-detector.fn';
 import { findDivergence } from './_utils/find-divergence.fn';
-import { TUniqueIdentifier } from '../_types/element.type';
+import type { TUniqueIdentifier } from '../_types/element.type';
 
 export abstract class SynchronizableStorage {
     public abstract readonly hash$$: Observable<string>;
@@ -359,7 +359,7 @@ export class Synchronizer {
     ): Promise<void> {
 
         // Find where the tables diverge
-        let divergingIndex = 0;
+        const divergingIndex = 0;
         while (true) {
             const divergenceIndex: number = await findDivergence(
                 tableName,

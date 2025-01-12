@@ -24,18 +24,18 @@ const hashTable = (
 ): Promise<string> => {
 
     // Open a transaction on the desired object store (table)
-    let transaction = db.transaction(tableName, 'readonly');
-    let objectStore = transaction.objectStore(tableName);
+    const transaction = db.transaction(tableName, 'readonly');
+    const objectStore = transaction.objectStore(tableName);
 
     // Open a cursor to iterate through all records
-    let cursorRequest = objectStore.openCursor();
+    const cursorRequest = objectStore.openCursor();
 
     let hash: string = '';
 
     return new Promise((resolve, reject) => {
 
         cursorRequest.onsuccess = (event) => {
-            let cursor = (event.target as IDBRequest).result;
+            const cursor = (event.target as IDBRequest).result;
 
             if (cursor) {
                 hash = objectHash(hash + cursor.value.hash);

@@ -1,6 +1,6 @@
 import objectHash from 'object-hash';
 import { IGNORED_TABLE_NAMES } from './ignored-table-names.const';
-import { TGenericTableName } from '../../_types/element.type';
+import type { TGenericTableName } from '../../_types/element.type';
 
 /**
  * 

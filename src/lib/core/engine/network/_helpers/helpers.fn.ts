@@ -1,4 +1,4 @@
-import { IDeleted, TClientId } from '../network.interfaces';
+import type { IDeleted, TClientId } from '../network.interfaces';
 
 export const syncDeletes = (
     clientAId: TClientId,

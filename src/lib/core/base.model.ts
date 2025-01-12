@@ -4,9 +4,9 @@ import {
     bindCallback,
     switchMap,
 } from 'rxjs';
-import { filterFunction, TSearchCriteriaType } from './data-types/filter.interfaces';
-import { IChangeSource, replayAndUpdate$, replayAndUpdateSingle$ } from './engine/change-event.util';
-import { PersistenceWrapper } from './engine/persistence.wrapper';
+import { filterFunction, type TSearchCriteriaType } from './data-types/filter.interfaces';
+import { type IChangeSource, replayAndUpdate$, replayAndUpdateSingle$ } from './engine/change-event.util';
+import type { PersistenceWrapper } from './engine/persistence.wrapper';
 import type { TUniqueIdentifier } from './engine/_types/element.type';
 
 export class BaseModel<TTableName extends string, ReturnType> {

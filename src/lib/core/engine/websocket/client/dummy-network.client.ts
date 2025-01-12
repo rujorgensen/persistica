@@ -1,9 +1,9 @@
 /**
  * Does not do anyhing
  */
-import { NetworkClient } from '../../network/abstract-network.client';
-import { NetworkHostInterface } from '../../network/network-client-interface.class';
-import { INetworkState } from '../../network/network.interfaces';
+import type { NetworkClient } from '../../network/abstract-network.client';
+import type { NetworkHostInterface } from '../../network/network-client-interface.class';
+import type { INetworkState } from '../../network/network.interfaces';
 
 export class DummyNetworkClient implements NetworkClient {
 

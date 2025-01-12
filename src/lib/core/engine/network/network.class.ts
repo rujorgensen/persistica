@@ -1,10 +1,10 @@
-import { BehaviorSubject, Observable, take } from 'rxjs';
-import { NetworkStore } from '../stores/network.store';
+import { BehaviorSubject, type Observable, take } from 'rxjs';
+import type { NetworkStore } from '../stores/network.store';
 import { syncDeletes } from './_helpers/helpers.fn';
-import { IKnownPeer, INetworkState, TClientId } from './network.interfaces';
-import { NetworkHostInterface } from './network-client-interface.class';
-import { NetworkServer } from './abstract-network.server';
-import { NetworkClient } from './abstract-network.client';
+import type { IKnownPeer, INetworkState, TClientId } from './network.interfaces';
+import type { NetworkHostInterface } from './network-client-interface.class';
+import type { NetworkServer } from './abstract-network.server';
+import type { NetworkClient } from './abstract-network.client';
 import { generateClientId } from './_helpers/network.fn';
 
 export type THandshakeState = 'disconnected' | 'connecting' | 'connected';

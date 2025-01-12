@@ -1,4 +1,4 @@
-import { TAnyCallback, TCallback, TGenericTableName } from '../_types/element.type';
+import type { TAnyCallback, TCallback, TGenericTableName } from '../_types/element.type';
 
 export class ListenerHandler {
     private readonly createListeners: Map<TGenericTableName, Set<TCallback<any>>> = new Map();

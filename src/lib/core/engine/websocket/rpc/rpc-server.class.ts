@@ -1,7 +1,7 @@
 /**
  * The class to handling the *called* side of the RPC.
  */
-import { RPCRequest, RPCResponse } from './rpc.interfaces';
+import type { RPCRequest, RPCResponse } from './rpc.interfaces';
 
 type TCallback = (...args: any) => any;
 

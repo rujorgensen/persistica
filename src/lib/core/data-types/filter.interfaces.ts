@@ -4,7 +4,7 @@ import {
     filterNumber,
     filterString,
 } from './filter.utils';
-import { OneOfType } from './one-of-type';
+import type { OneOfType } from './one-of-type';
 
 // ******************************************************************************
 // *** Criterias

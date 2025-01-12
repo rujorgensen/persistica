@@ -1,4 +1,4 @@
-import { RPCRequest, RPCResponse } from '../rpc/rpc.interfaces';
+import type { RPCRequest, RPCResponse } from '../rpc/rpc.interfaces';
 
 export type TChannel =
     'data' |

@@ -1,6 +1,6 @@
 import { BaseStore } from '../../base.store';
-import { INetworkState } from '../network/network.interfaces';
-import { PersistenceWrapper } from '../persistence.wrapper';
+import type { INetworkState } from '../network/network.interfaces';
+import type { PersistenceWrapper } from '../persistence.wrapper';
 
 export class NetworkStore extends BaseStore<'NetworkConfigurationStore', INetworkState> {
 

@@ -1,9 +1,9 @@
 import { BehaviorSubject, map, type Observable } from 'rxjs';
-import WebSocket, { WebSocketServer, MessageEvent } from 'ws';
-import { IChannelMessage, TChannel, TMessage } from './shared/websocket.interfaces';
+import WebSocket, { WebSocketServer, type MessageEvent } from 'ws';
+import type { IChannelMessage, TChannel, TMessage } from './shared/websocket.interfaces';
 import { RPCClient } from './rpc/rpc-client.class';
 import { RPCServer } from './rpc/rpc-server.class';
-import { RPCResponse } from './rpc/rpc.interfaces';
+import type { RPCResponse } from './rpc/rpc.interfaces';
 
 type BufferLike =
     | string

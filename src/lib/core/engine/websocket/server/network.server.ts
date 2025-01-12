@@ -1,7 +1,7 @@
-import { NetworkServer } from '../../network/abstract-network.server';
-import { IRegisterFunctions } from '../../network/network-client-interface.class';
-import { INetworkState } from '../../network/network.interfaces';
-import { PersisticaWebsocketServer } from '../websocket.server';
+import type { NetworkServer } from '../../network/abstract-network.server';
+import type { IRegisterFunctions } from '../../network/network-client-interface.class';
+import type { INetworkState } from '../../network/network.interfaces';
+import type { PersisticaWebsocketServer } from '../websocket.server';
 
 export class NetworkWebsocketServer implements NetworkServer {
 

@@ -6,8 +6,8 @@ import {
     switchMap,
     NEVER,
 } from 'rxjs';
-import { IChangeSource, replayAndUpdateSingle$ } from './engine/change-event.util';
-import { PersistenceWrapper } from './engine/persistence.wrapper';
+import { type IChangeSource, replayAndUpdateSingle$ } from './engine/change-event.util';
+import type { PersistenceWrapper } from './engine/persistence.wrapper';
 
 export class BaseStore<TTableName extends string, ReturnType> {
 

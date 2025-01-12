@@ -1,4 +1,4 @@
-import { IDeleted } from '../network.interfaces';
+import type { IDeleted } from '../network.interfaces';
 import { syncDeletes } from './helpers.fn';
 
 describe('syncDeletes', () => {
