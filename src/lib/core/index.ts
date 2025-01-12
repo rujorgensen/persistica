@@ -69,12 +69,12 @@ export {
     NetworkWebsocketClient,
 } from './engine/websocket/client/network.client';
 
-export {
-    type TDatabaseTableDefinition,
-    type TCallback,
-    TAnyCallback,
-    TGenericTableName,
-    TTableDefinition,
-    ReturnType2,
+export type {
+    TDatabaseTableDefinition,
+    TCallback,
     TDataParsers,
+    TGenericTableName,
+    ReturnType2,
+    TAnyCallback,
+    TTableDefinition,
 } from './engine/_types/element.type';

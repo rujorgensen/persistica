@@ -7,11 +7,12 @@ import type {
 import {
     addHash
 } from './helpers';
+import { it, describe, expect } from 'bun:test';
 
 const localClientId: string = 'local-client-id';
 const nonImportatLocalClientId: string = 'non-important-local-client-id';
 
-describe.skip('synchronizer [added]', () => {
+describe('synchronizer [added]', () => {
     it('[TCB1/2] should add a new entity upstream', () => {
         let prevElement: TDataType<string> | undefined;
         const local: TDataType<string>[] = [
@@ -197,7 +198,7 @@ describe.skip('synchronizer [added]', () => {
             'h',
         ]);
     });
-    
+
     it('[TCB3]: should add a new entity upstream, then downstream', () => {
         let prevElement: TDataType<string> | undefined;
         const local: TDataType<string>[] = [

@@ -1,6 +1,7 @@
+import 'fake-indexeddb/auto';
 import { Demo } from './_mocks/demo.class';
 import { subscribeSpyTo } from '@hirez_io/observer-spy';
-import 'fake-indexeddb/auto';
+import { it, describe, expect } from 'bun:test';
 
 describe('persistica', () => {
     it('should exist', () => {
@@ -10,7 +11,7 @@ describe('persistica', () => {
         expect(demo).toBeTruthy();
     });
 
-    it.only('emits the current value when new elements are created locally', async () => {
+    it('emits the current value when new elements are created locally', async () => {
         const demo: Demo = new Demo();
 
         const demoModelSpy = subscribeSpyTo(demo.demoModel.read$$({}));

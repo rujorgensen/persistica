@@ -276,6 +276,10 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
             };
 
             request.onerror = async () => {
+                if (!this.getUniqueIdentitier[tableName]) {
+                    throw new Error(`No unique identifier resolver for table "${tableName}"`);
+                }
+
                 console.log('⚡🔄 Checking if item already exists');
                 const uid: TUniqueIdentifier = this.getUniqueIdentitier[tableName].resolve(o);
                 console.log("indeddd", { uid });
@@ -303,6 +307,10 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
         tableName: TableName_,
         uid: TUniqueIdentifier,
     ): Promise<ReturnType | undefined> {
+        if (!this.getUniqueIdentitier[tableName]) {
+            throw new Error(`No unique identifier resolver for table "${tableName}"`);
+        }
+
         const indexName: string | undefined = this.getUniqueIdentitier[tableName].indexName;
 
         return this.getParsedItem<TableName_, ReturnType>(
@@ -326,7 +334,7 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
 
             request.onsuccess = (event: Event) => {
                 const result: TDateAsString<ReturnType>[] = (event.target as IDBRequest).result;
-                console.log(`⚡ ✅ Database values read`);
+                console.log('⚡ ✅ Database values read');
 
                 const parsed: ReadonlyArray<ReturnType> = result
                     .map((v: TDateAsString<ReturnType>) => v === undefined ? undefined : this.tableTypeParser[tableName](v));

@@ -1,4 +1,4 @@
-import type { TDateAsString } from "../../data-types/filter.interfaces";
+import type { TDateAsString } from '../../data-types/filter.interfaces';
 
 type TIdKeyName = string;
 export type TUniqueIdentifier = number | string; // string | number; //  `cuid-${string}`;
