@@ -69,7 +69,6 @@ export class PersisticaWebsocketClient {
                 webSocket.onopen = () => {
                     console.log('🔌 WebSocket connection established.');
                     this._connectionState$$.next('connected');
-
                     resolve();
                     this.connectedWebSocket = webSocket;
                 };
@@ -135,6 +134,17 @@ export class PersisticaWebsocketClient {
 
             connect();
         });
+    }
+
+    public disconnect(
+
+    ): Promise<void> {
+        if (this.connectedWebSocket) {
+            this.connectedWebSocket?.close();
+            this._connectionState$$.next('disconnected');
+        }
+
+        return Promise.resolve();
     }
 
     public callRemoteProcedure(

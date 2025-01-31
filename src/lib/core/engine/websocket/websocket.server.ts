@@ -89,6 +89,7 @@ export class PersisticaWebsocketServer {
                             this.channels.get(payload)?.add(webSocket);
 
                             break;
+
                         case 'rpc-request':
 
                             this.rpcServer

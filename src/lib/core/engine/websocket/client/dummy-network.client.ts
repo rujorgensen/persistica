@@ -13,6 +13,12 @@ export class DummyNetworkClient implements NetworkClient {
         throw new Error('connect method not implemented.');
     }
 
+    public disconnect(
+
+    ): Promise<void> {
+        throw new Error('disconnect method not implemented.');
+    }
+
     public joinNetwork(
         networkState: INetworkState,
     ): Promise<INetworkState> {

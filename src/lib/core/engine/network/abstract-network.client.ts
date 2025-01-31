@@ -6,6 +6,10 @@ export abstract class NetworkClient {
 
     ): Promise<void>;
 
+    public abstract disconnect(
+
+    ): Promise<void>;
+
     public abstract joinNetwork(
         networkState: INetworkState,
     ): Promise<INetworkState>;

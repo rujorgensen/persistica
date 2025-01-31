@@ -168,6 +168,17 @@ export class NetworkWebsocketClient implements NetworkClient {
         return this._wsCLient.connect();
     }
 
+    /**
+     * Disconnect from the server.
+     * 
+     * @returns { Promise<void> }
+     */
+    public disconnect(
+
+    ): Promise<void> {
+        return this._wsCLient.disconnect();
+    }
+
     public joinNetwork(
         networkState: INetworkState,
     ): Promise<INetworkState> {

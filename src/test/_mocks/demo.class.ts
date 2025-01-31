@@ -133,4 +133,15 @@ export class Demo {
     ): void {
         this.network.sendJoinNetworkRequest();
     }
+
+    /**
+     * Disconnect from server.
+     * 
+     * @returns { void }
+     */
+    public disconnect(
+
+    ): void {
+        this.network.disconnect();
+    }
 }

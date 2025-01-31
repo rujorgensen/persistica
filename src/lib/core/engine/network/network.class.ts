@@ -83,6 +83,18 @@ export class Network {
     }
 
     /**
+     * @returns { Promise<void> }
+     */
+    public async disconnect(
+
+    ): Promise<void> {
+        this._state$$.next('connecting');
+
+        // 1. Disconnect websocket
+        await this._networkClient.disconnect();
+    }
+
+    /**
      * Request to join a network.
      * 
      * @param { TClientId }         peerClientId
