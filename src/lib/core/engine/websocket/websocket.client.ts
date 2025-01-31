@@ -41,13 +41,10 @@ export class PersisticaWebsocketClient {
     public connect(
 
     ): Promise<void> {
-        if (typeof window === 'undefined') {
-            this._connectionState$$.next('disconnected');
-
-            return Promise.reject(new Error('WebSocket is not supported in this environment.'));
-        }
-
-        if (typeof WebSocket === 'undefined') {
+        if (
+            (typeof window === 'undefined') &&
+            (typeof WebSocket === 'undefined')
+        ) {
             this._connectionState$$.next('disconnected');
 
             return Promise.reject(new Error('WebSocket is not supported in this environment.'));

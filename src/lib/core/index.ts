@@ -40,11 +40,6 @@ export {
     generateNetworkId,
 } from './engine/network/_helpers/network.fn';
 
-// * Store
-export {
-    NetworkStore,
-} from './engine/stores/network.store';
-
 // * Websocket
 export {
     PersisticaWebsocketClient,
@@ -52,10 +47,6 @@ export {
 export {
     PersisticaWebsocketServer,
 } from './engine/websocket/websocket.server';
-
-export {
-    DummyNetworkServer,
-} from './engine/websocket/server/dummy-network.server';
 
 export {
     NetworkWebsocketServer,

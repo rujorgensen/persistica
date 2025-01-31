@@ -13,10 +13,10 @@ import type { TDataType } from '../../synchronizer/synchronizer-state-detector.f
 import { ListenerHandler } from '../listeners.class';
 import { IGNORED_TABLE_NAMES } from '../_utils/ignored-table-names.const';
 import type { TDataParsers, TGenericTableName, TUniqueIdentifier } from '../../_types/element.type';
+import type { TNetworkId } from '../../network/network.interfaces';
 
 const DATABASE_NAME = 'PERSISTICA' as const;
-const DATABASE_VERSION = 6 as const;
-const NETWORK_CONFIGURATION_STORE_UID = '_cuid';
+const DATABASE_VERSION = 1 as const;
 
 // ******************************************************************************
 // *** Implementation
@@ -36,10 +36,10 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
     private db_: IDBDatabase | null = null;
 
     constructor(
+        private readonly networkId: TNetworkId,
         private readonly instantiators: ((
             db: IDBDatabase,
         ) => void)[],
-
         private readonly tableTypeParser: TDataParsers<TableName>,
         private readonly getUniqueIdentitier: {
             [key in keyof TableTypeMap]: {
@@ -48,14 +48,6 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
             }
         },
     ) {
-        getUniqueIdentitier['NetworkConfigurationStore'] = {
-            resolve: (
-                element: unknown,
-            ): TUniqueIdentifier => {
-                return NETWORK_CONFIGURATION_STORE_UID;
-            },
-        };
-
         this.state$$ = this.state_$$.asObservable();
 
         this.tableHash$$ = new BehaviorSubject<Map<TGenericTableName, string | undefined> | undefined>(undefined);
@@ -226,11 +218,12 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
     public onUpgradedAndReady = this.events.onDatabaseUpgradedAndReady.bind(this.events);
 
     // * CRUD
-    public async create<ReturnType>(tableName: TableName, key: ReturnType): Promise<ReturnType>;
-    public async create<ReturnType>(tableName: TableName, key: ReadonlyArray<ReturnType>): Promise<ReadonlyArray<ReturnType>>;
+    public async create<ReturnType>(tableName: TableName, key: ReturnType, dontEmit?: boolean): Promise<ReturnType>;
+    public async create<ReturnType>(tableName: TableName, key: ReadonlyArray<ReturnType>, dontEmit?: boolean): Promise<ReadonlyArray<ReturnType>>;
     public async create<ReturnType>(
         tableName: TableName,
         o: ReturnType | ReadonlyArray<ReturnType>,
+        dontEmit?: boolean, // ! TODO 
     ): Promise<ReturnType | ReadonlyArray<ReturnType>> {
         const db = await this.init();
 
@@ -387,11 +380,12 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
         });
     }
 
-    public async update<ReturnType>(tableName: TableName, key: ReturnType): Promise<ReturnType>;
-    public async update<ReturnType>(tableName: TableName, key: ReadonlyArray<ReturnType>): Promise<ReadonlyArray<ReturnType>>;
+    public async update<ReturnType>(tableName: TableName, key: ReturnType, dontEmit?: boolean): Promise<ReturnType>;
+    public async update<ReturnType>(tableName: TableName, key: ReadonlyArray<ReturnType>, dontEmit?: boolean): Promise<ReadonlyArray<ReturnType>>;
     public async update<ReturnType>(
         tableName: TableName,
         o_: ReturnType | ReadonlyArray<ReturnType>,
+        dontEmit?: boolean, // ! TODO 
     ): Promise<ReturnType | ReadonlyArray<ReturnType>> {
         const o: ReturnType = o_ as ReturnType;
 
@@ -469,11 +463,12 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
      *  
      * @returns { Promise<void> } 
      */
-    public async delete<ReturnType>(tableName: TableName, key: TUniqueIdentifier): Promise<ReturnType>;
-    public async delete<ReturnType>(tableName: TableName, key: TUniqueIdentifier[]): Promise<ReadonlyArray<ReturnType>>;
+    public async delete<ReturnType>(tableName: TableName, key: TUniqueIdentifier, dontEmit?: boolean): Promise<ReturnType>;
+    public async delete<ReturnType>(tableName: TableName, key: TUniqueIdentifier[], dontEmit?: boolean): Promise<ReadonlyArray<ReturnType>>;
     public async delete<ReturnType>(
         tableName: TableName,
         key: TUniqueIdentifier | TUniqueIdentifier[],
+        dontEmit?: boolean, // ! TODO 
     ): Promise<ReturnType | undefined | ReadonlyArray<ReturnType>> {
         const db = await this.init();
 
@@ -536,7 +531,7 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
         }
 
         return new Promise((resolve, reject): void => {
-            const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
+            const request = indexedDB.open(`${DATABASE_NAME}-${this.networkId}`, DATABASE_VERSION);
 
             let wasUpgraded: boolean = false;
             request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
@@ -548,18 +543,18 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
                 }
 
                 // * Table for internal use
-                if (!db.objectStoreNames.contains('NetworkConfigurationStore')) {
-                    // It appears that an object store has to have a keyPath
-                    const dataFrameStore = db.createObjectStore('NetworkConfigurationStore', { keyPath: NETWORK_CONFIGURATION_STORE_UID });
-                    dataFrameStore.createIndex(NETWORK_CONFIGURATION_STORE_UID, NETWORK_CONFIGURATION_STORE_UID, { unique: true });
+                // if (!db.objectStoreNames.contains('NetworkConfigurationStore')) {
+                //     // It appears that an object store has to have a keyPath
+                //     const dataFrameStore = db.createObjectStore('NetworkConfigurationStore', { keyPath: NETWORK_CONFIGURATION_STORE_UID });
+                //     dataFrameStore.createIndex(NETWORK_CONFIGURATION_STORE_UID, NETWORK_CONFIGURATION_STORE_UID, { unique: true });
 
-                    dataFrameStore.createIndex('networkId', 'networkId', { unique: true });
-                    dataFrameStore.createIndex('networkKey', 'networkKey', { unique: true });
-                    dataFrameStore.createIndex('clientId', 'clientId', { unique: true });
-                    dataFrameStore.createIndex('version', 'version', { unique: true });
-                    dataFrameStore.createIndex('knownPeers', 'knownPeers', { unique: true });
-                    dataFrameStore.createIndex('deletes', 'deletes', { unique: true });
-                }
+                //     dataFrameStore.createIndex('networkId', 'networkId', { unique: true });
+                //     dataFrameStore.createIndex('networkKey', 'networkKey', { unique: true });
+                //     dataFrameStore.createIndex('clientId', 'clientId', { unique: true });
+                //     dataFrameStore.createIndex('version', 'version', { unique: true });
+                //     dataFrameStore.createIndex('knownPeers', 'knownPeers', { unique: true });
+                //     dataFrameStore.createIndex('deletes', 'deletes', { unique: true });
+                // }
 
                 // Transaction completed
                 // objectStore.transaction.oncompleted = (e) => {

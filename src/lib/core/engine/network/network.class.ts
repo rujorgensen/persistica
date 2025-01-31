@@ -1,11 +1,13 @@
 import { BehaviorSubject, type Observable, take } from 'rxjs';
-import type { NetworkStore } from '../stores/network.store';
 import { syncDeletes } from './_helpers/helpers.fn';
 import type { IKnownPeer, INetworkState, TClientId } from './network.interfaces';
 import type { NetworkHostInterface } from './network-client-interface.class';
 import type { NetworkServer } from './abstract-network.server';
 import type { NetworkClient } from './abstract-network.client';
-import { generateClientId } from './_helpers/network.fn';
+import {
+    Persistica,
+    type CurrentNetworkStore,
+} from 'src/lib/persistica.class';
 
 export type THandshakeState = 'disconnected' | 'connecting' | 'connected';
 
@@ -15,16 +17,19 @@ export class Network {
 
     public readonly networkHostInterfaces$$: BehaviorSubject<Map<TClientId, NetworkHostInterface>> = new BehaviorSubject(new Map());
 
+    private networkState: INetworkState;
+    private readonly _networkStore: CurrentNetworkStore;
+
     constructor(
-        private networkState: INetworkState,
-        private readonly _networkStore: NetworkStore,
+        private readonly _initialNetworkState: INetworkState,
         private readonly _networkServer: NetworkServer,
         private readonly _networkClient: NetworkClient,
     ) {
+        this.networkState = structuredClone(this._initialNetworkState);
+        this._networkStore = new Persistica().getNetworkStore(_initialNetworkState.networkId);
         this.state$$ = this._state$$.asObservable();
-
         this._networkStore
-            .read$$()
+            .onUpdate$$()
             .subscribe({
                 next: (networkState: INetworkState | undefined) => {
                     if (networkState) {
@@ -60,10 +65,6 @@ export class Network {
     ): Promise<void> {
         this._state$$.next('connecting');
 
-        if (!this.networkState) {
-            throw new Error('Network state is not available');
-        }
-
         // 1. Connect websocket
         await this._networkClient.connect();
 
@@ -72,14 +73,17 @@ export class Network {
             .joinNetwork(
                 this.networkState,
             );
+        console.log(3);
 
         const peerNetworkClientInterface: NetworkHostInterface = this._networkClient.getPeerInterface();
+        console.log(4);
 
         this.hostConnected(
             peerNetworkState.clientId,
             peerNetworkState,
             peerNetworkClientInterface,
         );
+        console.log(5);
     }
 
     /**
@@ -108,16 +112,7 @@ export class Network {
         peerNetworkState: INetworkState,
         networkKey?: string,
     ): INetworkState {
-
-        this.networkState = this.networkState || {
-            ...peerNetworkState,
-            clientId: generateClientId(),
-        };
-
-        if (!this.networkState) {
-            throw new Error('Network state is not available');
-        }
-
+        console.log(1);
         const isKnownPeer: boolean = this.isKnownPeer(peerClientId);
         if (
             // Unknown client
@@ -154,6 +149,12 @@ export class Network {
         networkState: INetworkState,
         hostNetworkClientInterface: NetworkHostInterface,
     ): void {
+        console.log("hostConnected");
+        console.log("hostConnected");
+        console.log("hostConnected");
+        console.log("hostConnected");
+        console.log("hostConnected");
+        console.log("hostConnected");
         this.clientConnected(
             clientId,
             networkState,
@@ -187,10 +188,6 @@ export class Network {
         clientId: TClientId,
         networkState: INetworkState,
     ): void {
-        if (!this.networkState) {
-            throw new Error('Network state is not available');
-        }
-
         const client: IKnownPeer | undefined = this.networkState.knownPeers.find((peer) => peer.clientId === clientId);
 
         if (client) {
@@ -208,7 +205,6 @@ export class Network {
             this.networkState.deletes,
             networkState.deletes,
         );
-
         this._networkStore.update(this.networkState);
 
         this._state$$.next('connected');
@@ -223,10 +219,6 @@ export class Network {
     private isKnownPeer(
         peerClientId: TClientId,
     ): boolean {
-        if (!this.networkState) {
-            throw new Error('Network state is not available');
-        }
-
         return !!this.networkState.knownPeers.find((peer) => peer.clientId === peerClientId);
     }
 }

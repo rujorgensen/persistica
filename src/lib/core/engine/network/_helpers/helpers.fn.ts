@@ -3,13 +3,13 @@ import type { IDeleted, TClientId } from '../network.interfaces';
 export const syncDeletes = (
     clientAId: TClientId,
     clientBId: TClientId,
-    netWorkADeletes: IDeleted[],
-    netWorkBDeletes: IDeleted[],
+    networkADeletes: IDeleted[],
+    networkBDeletes: IDeleted[],
 ): IDeleted[] => {
 
     const allDeletes: IDeleted[] = [
-        ...netWorkADeletes,
-        ...netWorkBDeletes,
+        ...networkADeletes,
+        ...networkBDeletes,
     ]
         .map((deleted: IDeleted) => {
             return {

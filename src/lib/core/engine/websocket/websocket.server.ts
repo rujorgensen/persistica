@@ -25,7 +25,7 @@ type BufferLike =
     ;
 
 export class PersisticaWebsocketServer {
-    public readonly isConnected$$: Observable<boolean>;
+    public readonly isListening$$: Observable<boolean>;
 
     private readonly wss: BehaviorSubject<WebSocketServer | undefined> = new BehaviorSubject<WebSocketServer | undefined>(undefined);
 
@@ -37,6 +37,7 @@ export class PersisticaWebsocketServer {
         ['databaseHash', new Set()],
     ]);
     public readonly rpcServer: RPCServer = new RPCServer();
+    public readonly connectedClients: Set<WebSocket> = new Set();
 
     constructor(
         port: number,
@@ -44,34 +45,32 @@ export class PersisticaWebsocketServer {
         console.log('Creating WS server on port:', port);
         const webSocketServer = new WebSocketServer({ port });
 
-        // * Register RPC methods (yes, the server is on the client)
-        this.isConnected$$ = this.wss
+        // * Register RPC methods
+        this.isListening$$ = this.wss
             .pipe(
                 map((wss: WebSocketServer | undefined) => wss !== undefined),
             );
 
         webSocketServer
             .on('listening', () => {
-                console.log('WS Server is now listening on port:', port);
+                console.log(`WS Server is now listening on port ${port}`);
                 this.wss.next(webSocketServer);
             });
 
         webSocketServer
             .on('connection', (webSocket: WebSocket) => {
-                // * Register RPC methods (yes, the client is on the server)
-                const rpcClient: RPCClient = new RPCClient(
-                    webSocket.send
-                );
+                // * Register RPC methods (yes, the RPC client is on the server)
+                const rpcClient: RPCClient = new RPCClient(webSocket.send);
 
-                console.log('connection established');
+                console.log('Connection established');
 
+                this.connectedClients.add(webSocket);
                 webSocket.onerror = console.error;
 
                 webSocket.onmessage = (
                     event: MessageEvent,
                 ): void => {
                     const message: TMessage = JSON.parse(event.data.toString());
-
                     const {
                         type,
                         payload,
@@ -133,6 +132,8 @@ export class PersisticaWebsocketServer {
                             clients.delete(webSocket);
                         }
                     });
+
+                    this.connectedClients.delete(webSocket);
                 };
             });
     };
