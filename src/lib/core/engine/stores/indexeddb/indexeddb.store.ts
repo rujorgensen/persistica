@@ -16,6 +16,7 @@ import type { TDataParsers, TGenericTableName, TUniqueIdentifier } from '../../_
 
 const DATABASE_NAME = 'PERSISTICA' as const;
 const DATABASE_VERSION = 6 as const;
+const NETWORK_CONFIGURATION_STORE_UID = '_cuid';
 
 // ******************************************************************************
 // *** Implementation
@@ -47,6 +48,14 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
             }
         },
     ) {
+        getUniqueIdentitier['NetworkConfigurationStore'] = {
+            resolve: (
+                element: unknown,
+            ): TUniqueIdentifier => {
+                return NETWORK_CONFIGURATION_STORE_UID;
+            },
+        };
+
         this.state$$ = this.state_$$.asObservable();
 
         this.tableHash$$ = new BehaviorSubject<Map<TGenericTableName, string | undefined> | undefined>(undefined);
@@ -235,7 +244,7 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
             ) => {
                 return new Promise<TUniqueIdentifier>((resolve, reject) => {
                     const request = store.add({
-                        hash: objectHash(item!),
+                        hash: objectHash(item),
                         ...item,
                     });
 
@@ -260,7 +269,7 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
         return new Promise((resolve, reject): void => {
             const request = store.add({
                 ...o,
-                hash: objectHash(o!),
+                hash: objectHash(o),
             });
 
             request.onsuccess = async () => {
@@ -282,7 +291,6 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
 
                 console.log('⚡🔄 Checking if item already exists');
                 const uid: TUniqueIdentifier = this.getUniqueIdentitier[tableName].resolve(o);
-                console.log("indeddd", { uid });
                 const fallbackResult = await this.read(tableName, uid); // Call your fallback Promise function here.
 
                 console.error('⚡❌ Error setting item: ', JSON.stringify(o));
@@ -399,7 +407,7 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
                 return new Promise<TUniqueIdentifier>((resolve, reject) => {
                     const request = store.put({
                         ...item,
-                        hash: objectHash(item!),
+                        hash: objectHash(item),
                     });
 
                     request.onsuccess = () => resolve(request.result as IDBValidKey as TUniqueIdentifier);
@@ -430,7 +438,7 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
                 .put(
                     {
                         ...o,
-                        hash: objectHash(o!),
+                        hash: objectHash(o),
                     },
                 );
 
@@ -542,8 +550,8 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
                 // * Table for internal use
                 if (!db.objectStoreNames.contains('NetworkConfigurationStore')) {
                     // It appears that an object store has to have a keyPath
-                    const dataFrameStore = db.createObjectStore('NetworkConfigurationStore', { keyPath: '_cuid' });
-                    dataFrameStore.createIndex('_cuid', '_cuid', { unique: true });
+                    const dataFrameStore = db.createObjectStore('NetworkConfigurationStore', { keyPath: NETWORK_CONFIGURATION_STORE_UID });
+                    dataFrameStore.createIndex(NETWORK_CONFIGURATION_STORE_UID, NETWORK_CONFIGURATION_STORE_UID, { unique: true });
 
                     dataFrameStore.createIndex('networkId', 'networkId', { unique: true });
                     dataFrameStore.createIndex('networkKey', 'networkKey', { unique: true });

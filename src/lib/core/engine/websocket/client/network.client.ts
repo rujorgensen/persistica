@@ -24,6 +24,11 @@ class NetworkHostWebsocketInterface implements NetworkHostInterface {
     private readonly _databaseHash$$: BehaviorSubject<string | undefined> = new BehaviorSubject<string | undefined>(undefined);
     public readonly databaseHash$$: Observable<string>;
 
+    // * Live updates on the opposite side
+    public readonly onCreate;
+    public readonly onUpdate;
+    public readonly onDelete;
+
     constructor(
         private readonly _wsClient: PersisticaWebsocketClient,
     ) {
@@ -43,12 +48,12 @@ class NetworkHostWebsocketInterface implements NetworkHostInterface {
             .then((hash: string) => {
                 this._databaseHash$$.next(hash);
             });
-    }
 
-    // * Live updates on the opposite side
-    public onCreate = this._wsClient.onCreate.bind(this._wsClient);
-    public onUpdate = this._wsClient.onUpdate.bind(this._wsClient);
-    public onDelete = this._wsClient.onDelete.bind(this._wsClient);
+        // * Live updates on the opposite side
+        this.onCreate = this._wsClient.onCreate.bind(this._wsClient);
+        this.onUpdate = this._wsClient.onUpdate.bind(this._wsClient);
+        this.onDelete = this._wsClient.onDelete.bind(this._wsClient);
+    }
 
     // * Update on the opposite side
     public create<T>(

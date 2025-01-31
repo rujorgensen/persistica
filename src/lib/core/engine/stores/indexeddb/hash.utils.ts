@@ -5,7 +5,7 @@ export const hashTables = async (
     db: IDBDatabase,
 ): Promise<Map<string, string | undefined>> => {
     const tables: IDBDatabaseInfo[] = await indexedDB.databases();
-    console.log('⚡ hashTables', { tables: tables.map((a: IDBDatabaseInfo) => a.name + ' ' + a.version) });
+    console.log('⚡ hashTables', { tables: tables.map((a: IDBDatabaseInfo) => `${a.name} v. ${a.version}`) });
 
     const map: Map<string, string | undefined> = new Map();
 
@@ -44,7 +44,7 @@ const hashTable = (
                 cursor.continue();
             } else {
                 // No more records to process
-                console.log('⚡ All entries iterated.');
+                console.log(`⚡ All entries iterated in table "${tableName}"`);
 
                 resolve(hash);
             }

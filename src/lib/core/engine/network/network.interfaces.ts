@@ -13,7 +13,7 @@ export interface IKnownPeer {
 
 export interface INetworkState {
     networkId: TNetworkId;
-    networkKey: string; // Only keep locally, remove when transferring
+    networkKey?: string; // Only keep locally, remove when transferring
     clientId: TClientId;
     version: number;
     knownPeers: IKnownPeer[];

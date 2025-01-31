@@ -13,11 +13,10 @@ export class Network {
     public readonly state$$: Observable<THandshakeState>;
     private readonly _state$$: BehaviorSubject<THandshakeState> = new BehaviorSubject<THandshakeState>('disconnected');
 
-    public networkState: INetworkState | undefined;
-
     public readonly networkHostInterfaces$$: BehaviorSubject<Map<TClientId, NetworkHostInterface>> = new BehaviorSubject(new Map());
 
     constructor(
+        private networkState: INetworkState,
         private readonly _networkStore: NetworkStore,
         private readonly _networkServer: NetworkServer,
         private readonly _networkClient: NetworkClient,
@@ -52,15 +51,6 @@ export class Network {
     // ******************************************************************************
     // *** 
     // ******************************************************************************
-
-    /**
-     * @returns { void }
-     */
-    public listen(
-
-    ): void {
-        this._networkServer.listen();
-    }
 
     /**
      * @returns { Promise<void> }
@@ -171,11 +161,10 @@ export class Network {
                     this.networkHostInterfaces$$.next(map);
                 },
             });
-
     }
 
     /**
-     * Updates "lastSeenAt" and syncin deletes
+     * Updates "lastSeenAt" and synchronizing deletes
      * 
      * @param { TClientId }         clientId
      * @param { INetworkState }     networkState

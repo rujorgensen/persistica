@@ -60,13 +60,18 @@ const parseProperties = (
 
             return {
                 name: words[0] ?? '',
-                type: type ?? '',
+                type: type,
                 isOptional: type.at(-1) === '?',
             };
         });
 };
 
-
+/**
+ * 
+ * @param { string }    input
+ * 
+ * @returns { string[] } 
+ */
 function extractLinesBetweenCurlyBraces(
     input: string,
 ): string[] {

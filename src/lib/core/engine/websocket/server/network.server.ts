@@ -23,25 +23,17 @@ export class NetworkWebsocketServer implements NetworkServer {
 
     /**
      * 
-     */
-    public listen(
-
-    ): void {
-        console.log('Server is always listening');
-    }
-
-    /**
+     * @param fn
      * 
-     * @param fn 
+     * @returns { void }
      */
     public onIncommingConnectionRequest(
         fn: (
             peerNetworkState: INetworkState,
         ) => INetworkState,
     ): void {
-
         this._server.rpcServer.registerMethod(
-            'joinNetwork',              // RPC method name
+            'joinNetwork',  // RPC method name
             (
                 peerNetworkState: INetworkState,
             ): INetworkState => {

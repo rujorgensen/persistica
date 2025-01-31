@@ -370,11 +370,8 @@ export class Synchronizer {
 
             const localRow: TDataType<T> | undefined = await this._synchronizableStorage.readElementAt(tableName, divergenceIndex);
             const remoteRow: TDataType<T> | undefined = await this._networkHostInterface.readElementAt(tableName, divergenceIndex);
-
-
         }
 
         return Promise.resolve();
     }
-
 }

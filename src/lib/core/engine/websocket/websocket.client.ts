@@ -11,7 +11,7 @@ export class PersisticaWebsocketClient {
     public readonly isConnected$$: Observable<boolean>;
 
     public readonly connectionState$$: Observable<TConnectionState>;
-    private readonly channelListeners: Map<TChannel, Set<(...argumnets: any) => void>> = new Map([
+    private readonly channelListeners: Map<TChannel, Set<(_: any) => void>> = new Map([
         ['data', new Set()],
         ['state', new Set()],
         ['version', new Set()],

@@ -21,8 +21,8 @@ export interface IJoinMessage {
 export interface IChannelMessage {
     type: 'message';
     payload: {
-        channel: TChannel,
-        data: any
+        channel: TChannel;
+        data: any;
     };
 }
 
