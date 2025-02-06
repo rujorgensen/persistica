@@ -102,7 +102,7 @@ export class Demo {
             },
         );
 
-        this.websocketClient = new PersisticaWebsocketClient(9_000);
+        this.websocketClient = new PersisticaWebsocketClient(3_000);
 
         this.network = new Network(
             this.networkState,

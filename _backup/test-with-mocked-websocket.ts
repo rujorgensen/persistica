@@ -1,12 +1,10 @@
 import 'fake-indexeddb/auto';
-import { WebSocket, Server } from 'mock-socket';
 import { Demo } from './_mocks/demo.class';
 import { subscribeSpyTo } from '@hirez_io/observer-spy';
 import { Persistica } from '../lib/persistica.class';
-import { it, describe, expect, mock, beforeEach, afterEach } from 'bun:test';
+import { it, describe, expect, mock, beforeEach } from 'bun:test';
 import { PersisticaWebsocketServer } from '@persistica/core';
 import { LocalStorageMock } from './_mocks/local-storage.mock';
-import { filter, lastValueFrom } from 'rxjs';
 
 const wait = (
     timeout: number,
@@ -14,40 +12,151 @@ const wait = (
     setTimeout(resolve, timeout);
 });
 
+class WebsocketWrapper {
+    private callbacks: Map<string, (...args) => void> = new Map()
+
+    public onConnection(cb: (
+        ws: WebSocketMock,
+    ) => void): void {
+        this.callbacks.set('connection', cb);
+    }
+
+    public onOpen(cb: (
+
+    ) => void): void {
+        this.callbacks.set('onopen', cb);
+    }
+
+    public onClose(cb: (
+
+    ) => void): void {
+        this.callbacks.set('onclose', cb);
+    }
+
+    public onMessageOnClient(cb: (
+        msg: string,
+    ) => void): void {
+        this.callbacks.set('onmessage', cb);
+    }
+
+    // public onMessageOnServer(cb: (
+    //     msg: string,
+    // ) => void): void {
+    //     this.callbacks.set('send-message-to-server', cb);
+    // }
+
+    public connectToServer(
+        ws: WebSocketMock,
+    ): void {
+        setTimeout(() => {
+
+            // Emit event to server
+            this.callbacks.get('connection')(ws);
+
+            // Emit event to client
+            this.callbacks.get('onopen')();
+        });
+    }
+
+    public closeConnection(
+        ws: WebSocketMock,
+    ): void {
+        setTimeout(() => {
+            // Emit event to server
+            ws.onclose();//   this.callbacks.get('trig-disconnection')(ws);
+
+            // Emit event to client
+            this.callbacks.get('onclose')();
+        });
+    }
+
+    public sendMessage(
+        ws: WebSocketMock,
+        msg: string,
+    ): void {
+        setTimeout(() => {
+            // Emit event to client
+            // this.callbacks.get('send-message-to-server')(msg);
+            ws.onmessage(msg);
+        });
+    }
+}
+
+const websocketWrapper: WebsocketWrapper = new WebsocketWrapper();
+
+class WebSocketMock {
+    constructor(
+        private path: string,
+    ) {
+        websocketWrapper.onOpen(() => this.onopen());
+        websocketWrapper.onClose(() => this.onclose());
+        websocketWrapper.onMessageOnClient(() => this.onmessage());
+
+        websocketWrapper.connectToServer(this);
+    }
+
+    public onopen;
+    public onclose;
+    public onmessage
+
+    public send(
+        message: string,
+    ) {
+        websocketWrapper.sendMessage(this, <any>{
+            data: message,
+            type: '-unknown-type-',
+            target: this,
+        });
+    }
+
+    public close(
+    ) {
+        websocketWrapper.closeConnection(this);
+    }
+}
+
+class WebSocketServer {
+    private callbacks: Map<string, (...args) => void> = new Map()
+
+    constructor(
+
+    ) {
+        //  websocketWrapper.onMessageOnServer((msg) => this.onmessage(msg));
+
+        websocketWrapper.onConnection((ws) => {
+            this.callbacks.get('connection')(ws);
+
+        });
+
+        setTimeout(() => {
+            this.callbacks.get('listening')();
+        });
+    }
+
+    //public onmessage;
+
+    public on(
+        event: string,
+        callback: () => void,
+    ): void {
+        this.callbacks.set(event, callback);
+    }
+}
+
 (<any>global).localStorage = new LocalStorageMock;
-(<any>global).WebSocket = WebSocket;
-(<any>global).WebSocketServer = Server;
+(<any>global).WebSocket = WebSocketMock;
+(<any>global).WebSocketServer = WebSocketServer;
 
 describe('persistica', () => {
     const persistica: Persistica = new Persistica();
     let persisticaWebsocketServer: PersisticaWebsocketServer;
 
-    // mock.module('ws', () => ({
-    //     WebSocketServer: Server,
-    // }));
+    mock.module('ws', () => ({
+        WebSocketServer,
+    }));
 
-    beforeEach((done) => {
+    beforeEach(() => {
         persisticaWebsocketServer = new PersisticaWebsocketServer(3_000);
-
-        // Wait for the server to start listening
-        persisticaWebsocketServer
-            .isListening$$
-            .pipe(
-                filter((isListening: boolean) => isListening),
-            )
-            .subscribe({
-                next: () => {
-                    console.log('Server is listening, starting tests');
-
-                    done();
-                },
-            });
-    });
-
-    afterEach(async () => {
-        persisticaWebsocketServer.isListening$$.subscribe((a) => console.log('isListening', a));
-
-        await persisticaWebsocketServer.close();
     });
 
     describe('Websocket client', () => {
@@ -126,7 +235,7 @@ describe('persistica', () => {
 
     });
 
-    describe('synchronization', () => {
+    describe.only('synchronization', () => {
         it('should start by deleting locally deleted elements', async () => {
             const demo: Demo = new Demo(persisticaWebsocketServer, {
                 networkId: 'ni-123',

@@ -1,4 +1,15 @@
-import { BehaviorSubject, map, type Observable } from 'rxjs';
+/**
+ * @version 
+ *                  0.1.0
+ * 
+ * @changelog
+ *                  0.1.0, 2025.02.06
+ *                      - Initial version
+ * 
+ * @description
+ *                  This file contains the WebSocket server class.
+ */
+import { BehaviorSubject, map, tap, type Observable } from 'rxjs';
 import WebSocket, { WebSocketServer, type MessageEvent } from 'ws';
 import type { IChannelMessage, TChannel, TMessage } from './shared/websocket.interfaces';
 import { RPCClient } from './rpc/rpc-client.class';
@@ -42,7 +53,7 @@ export class PersisticaWebsocketServer {
     constructor(
         port: number,
     ) {
-        console.log('Creating WS server on port:', port);
+        console.log(`Creating WS server on port: ${port}`);
         const webSocketServer = new WebSocketServer({ port });
 
         // * Register RPC methods
@@ -170,5 +181,29 @@ export class PersisticaWebsocketServer {
                 client.send(socketPacket);
             }
         }
+    }
+
+    /**
+     * Close the WebSocket server.
+     * 
+     * @throws { Error } If the server is not running.
+     * 
+     * @returns { Promise<void> }
+     */
+    public close(
+    ): Promise<void> {
+        return new Promise((resolve, reject) => {
+
+            if (this.wss.value) {
+                this.wss.value.close(() => {
+                    console.log('WebSocket server closed');
+                    resolve();
+                });
+
+                return;
+            }
+
+            reject(new Error('No server running'));
+        });
     }
 }

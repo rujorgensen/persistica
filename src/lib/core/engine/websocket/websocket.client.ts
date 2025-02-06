@@ -95,7 +95,7 @@ export class PersisticaWebsocketClient {
                             break;
 
                         default:
-                            console.log('🔌 [WebSocket] unhandled type:', type);
+                            console.log(`🔌 [WebSocket] unhandled type: "${type}"`);
                             break;
                     }
                 };
@@ -103,15 +103,17 @@ export class PersisticaWebsocketClient {
                 webSocket.onerror = (error: Event) => {
                     this.connectedWebSocket = undefined;
                     this._connectionState$$.next('disconnected');
-                    console.error('WebSocket Error:', error);
-                    reject(new Error(error.toString()));
+                    console.error(`WebSocket error caught: "${error.type}"`);
+
+                    reject(new Error('websocket error'));
                 };
 
                 webSocket.onclose = (event: CloseEvent) => {
                     this.connectedWebSocket = undefined;
                     this._connectionState$$.next('disconnected');
-                    console.log('🔌 WebSocket connection closed:', event);
-                    reject(new Error(event.reason));
+                    console.log('🔌 WebSocket connection closed');
+
+                    reject(new Error(event.type));
                 };
             };
 

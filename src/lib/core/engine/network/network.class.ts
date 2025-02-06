@@ -66,24 +66,27 @@ export class Network {
         this._state$$.next('connecting');
 
         // 1. Connect websocket
-        await this._networkClient.connect();
+        await this._networkClient
+            .connect()
+            .catch(() => {
+                console.log("caught");
+
+                this.disconnect();
+            });
 
         // 2. Send join request
         const peerNetworkState: INetworkState = await this._networkClient
             .joinNetwork(
                 this.networkState,
             );
-        console.log(3);
 
         const peerNetworkClientInterface: NetworkHostInterface = this._networkClient.getPeerInterface();
-        console.log(4);
 
         this.hostConnected(
             peerNetworkState.clientId,
             peerNetworkState,
             peerNetworkClientInterface,
         );
-        console.log(5);
     }
 
     /**
@@ -92,7 +95,7 @@ export class Network {
     public async disconnect(
 
     ): Promise<void> {
-        this._state$$.next('connecting');
+        this._state$$.next('disconnected');
 
         // 1. Disconnect websocket
         await this._networkClient.disconnect();
