@@ -53,10 +53,6 @@ export {
 } from './engine/websocket/server/network.server';
 
 export {
-    DummyNetworkClient,
-} from './engine/websocket/client/dummy-network.client';
-
-export {
     NetworkWebsocketClient,
 } from './engine/websocket/client/network.client';
 
