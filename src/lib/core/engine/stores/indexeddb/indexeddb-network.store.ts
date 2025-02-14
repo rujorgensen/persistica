@@ -267,6 +267,7 @@ export class IndexedDBNetworkStore {
     }
 
     /**
+     * Parses an item from the database
      * 
      * @param { TNetworkId } networkId
      * 

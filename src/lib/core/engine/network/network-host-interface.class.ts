@@ -1,6 +1,7 @@
 import type { Observable } from 'rxjs';
 import type { TDataType } from '../synchronizer/synchronizer-state-detector.fn';
 import type { TUniqueIdentifier } from '../_types/element.type';
+import type { TSynchronizerState } from '../synchronizer/synchronizer';
 
 /**
  * The interface that the server will use to register RPC functions
@@ -12,27 +13,29 @@ export interface IRegisterFunctions {
         batchSize: number,
     ): Promise<ReadonlyArray<TDataType<T>>>;
 
-    readElementAt: <T>(
+    readElementAt<T>(
         tableName: string,
         index: number,
-    ) => Promise<TDataType<T> | undefined>;
+    ): Promise<TDataType<T> | undefined>;
 
-    create: <T, TableName extends string>(
+    create<T, TableName extends string>(
         tableName: TableName,
         data: ReadonlyArray<TDataType<T>>,
-    ) => Promise<void>,
+    ): Promise<void>,
 
-    update: <T>(
+    update<T>(
         tableName: string,
         data: ReadonlyArray<TDataType<T>>,
-    ) => Promise<void>,
+    ): Promise<void>,
 
-    delete: (
+    delete(
         tableName: string,
         data: TUniqueIdentifier[],
-    ) => Promise<void>,
+    ): Promise<void>,
 
-    readDatabaseHash: () => Promise<string>,
+    readDatabaseHash(
+
+    ): Promise<string>,
 
     readRowCount(
         tableName: string,
@@ -46,10 +49,14 @@ export interface IRegisterFunctions {
         tableName: string,
         rowIndex: number,
     ): Promise<string | undefined>;
+
+    // emitSynchronizationState(
+    //     state: TSynchronizerState,
+    // ): Promise<void>;
 }
 
 /**
- * 
+ * The interface to the network host
  */
 export abstract class NetworkHostInterface implements IRegisterFunctions {
     public abstract readonly databaseHash$$: Observable<string>;
@@ -124,5 +131,14 @@ export abstract class NetworkHostInterface implements IRegisterFunctions {
         tableName: string,
         rowIndex: number,
     ): Promise<string | undefined>;
+
+    /**
+     * Notify the host, of the current sync state.
+     * 
+     * @param state 
+     */
+    public abstract emitSynchronizationState(
+        state: TSynchronizerState,
+    ): Promise<void>;
 
 }

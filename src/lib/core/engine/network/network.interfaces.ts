@@ -6,6 +6,11 @@ export interface IDeleted {
     synchronizedWith: TClientId[];
 }
 
+export interface ITableDeletes {
+    tableName: string;
+    deletes: IDeleted[];
+}
+
 export interface IKnownPeer {
     clientId: TClientId;
     lastSeenAt: Date;
@@ -17,5 +22,5 @@ export interface INetworkState {
     clientId: TClientId;
     version: number;
     knownPeers: IKnownPeer[];
-    deletes: IDeleted[];
+    tableDeletes: ITableDeletes[];
 }

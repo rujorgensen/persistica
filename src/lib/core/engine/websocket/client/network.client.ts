@@ -38,16 +38,10 @@ class NetworkHostWebsocketInterface implements NetworkHostInterface {
             );
 
         this._wsClient
-            .onRemoteDatabaseHash((
-                remoteDataBaseHash: string,
-            ) => {
-                this._databaseHash$$.next(remoteDataBaseHash);
-            });
+            .onRemoteDatabaseHash(this._databaseHash$$.next);
 
         this.readDatabaseHash()
-            .then((hash: string) => {
-                this._databaseHash$$.next(hash);
-            });
+            .then(this._databaseHash$$.next);
 
         // * Live updates on the opposite side
         this.onCreate = this._wsClient.onCreate.bind(this._wsClient);

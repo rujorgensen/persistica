@@ -11,7 +11,7 @@ export class NetworkWebsocketServer implements NetworkServer {
     ) {
         // Register functions
         const functions = Object.entries(this._registerFunctions);
-        console.log(`Registering ${Object.keys(this._registerFunctions).length} RPC functions`);
+        console.log(`[NW Server] Registering ${Object.keys(this._registerFunctions).length} RPC functions`);
         for (const [key, value] of functions) {
             // console.log(`Registering RPC function: "${key}"`);
             this._server.rpcServer

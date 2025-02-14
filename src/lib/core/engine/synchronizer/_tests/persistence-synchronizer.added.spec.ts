@@ -1,3 +1,4 @@
+import { expect, describe, it } from 'vitest';
 import {
     compareArrays,
 } from '../synchronize.fn';
@@ -7,7 +8,6 @@ import type {
 import {
     addHash
 } from './helpers';
-import { it, describe, expect } from 'bun:test';
 
 const localClientId: string = 'local-client-id';
 const nonImportatLocalClientId: string = 'non-important-local-client-id';

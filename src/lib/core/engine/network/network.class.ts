@@ -1,5 +1,15 @@
+/**
+ * @version 
+ *                  0.1.0
+ * 
+ * @changelog
+ *                  0.1.0, 2025.02.11
+ *                      - Initial version
+ * 
+ * @description
+ *                  Client side network connector and interface.
+ */
 import { BehaviorSubject, type Observable, take } from 'rxjs';
-import { syncDeletes } from './_helpers/helpers.fn';
 import type { IKnownPeer, INetworkState, TClientId } from './network.interfaces';
 import type { NetworkHostInterface } from './network-client-interface.class';
 import type { NetworkServer } from './abstract-network.server';
@@ -58,6 +68,8 @@ export class Network {
     // ******************************************************************************
 
     /**
+     * Sends a join request to the network.
+     * 
      * @returns { Promise<void> }
      */
     public async sendJoinNetworkRequest(
@@ -69,7 +81,7 @@ export class Network {
         await this._networkClient
             .connect()
             .catch(() => {
-                console.log("caught");
+                console.log('[NW Client] Connection failed');
 
                 this.disconnect();
             });
@@ -152,12 +164,6 @@ export class Network {
         networkState: INetworkState,
         hostNetworkClientInterface: NetworkHostInterface,
     ): void {
-        console.log("hostConnected");
-        console.log("hostConnected");
-        console.log("hostConnected");
-        console.log("hostConnected");
-        console.log("hostConnected");
-        console.log("hostConnected");
         this.clientConnected(
             clientId,
             networkState,

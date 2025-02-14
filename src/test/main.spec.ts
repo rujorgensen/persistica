@@ -1,47 +1,39 @@
 import 'fake-indexeddb/auto';
-import { WebSocket, Server } from 'mock-socket';
+import { WebSocket, WebSocketServer } from 'ws';
 import { Demo } from './_mocks/demo.class';
 import { subscribeSpyTo } from '@hirez_io/observer-spy';
 import { Persistica } from '../lib/persistica.class';
-import { it, describe, expect, mock, beforeEach, afterEach } from 'bun:test';
+import { it, describe, expect, beforeEach, afterEach } from 'vitest'
 import { PersisticaWebsocketServer } from '@persistica/core';
 import { LocalStorageMock } from './_mocks/local-storage.mock';
-import { filter, lastValueFrom } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 
 const wait = (
-    timeout: number,
+    timeoutMilliSeconds: number,
 ): Promise<void> => new Promise((resolve) => {
-    setTimeout(resolve, timeout);
+    setTimeout(resolve, timeoutMilliSeconds);
 });
 
 (<any>global).localStorage = new LocalStorageMock;
 (<any>global).WebSocket = WebSocket;
-(<any>global).WebSocketServer = Server;
+global.WebSocketServer = WebSocketServer;
+
 
 describe('persistica', () => {
     const persistica: Persistica = new Persistica();
     let persisticaWebsocketServer: PersisticaWebsocketServer;
 
-    // mock.module('ws', () => ({
-    //     WebSocketServer: Server,
-    // }));
-
-    beforeEach((done) => {
+    beforeEach(async () => {
         persisticaWebsocketServer = new PersisticaWebsocketServer(3_000);
 
         // Wait for the server to start listening
-        persisticaWebsocketServer
-            .isListening$$
-            .pipe(
-                filter((isListening: boolean) => isListening),
-            )
-            .subscribe({
-                next: () => {
-                    console.log('Server is listening, starting tests');
-
-                    done();
-                },
-            });
+        await firstValueFrom(
+            persisticaWebsocketServer
+                .isListening$$
+                .pipe(
+                    filter((isListening: boolean) => isListening)
+                ),
+        );
     });
 
     afterEach(async () => {

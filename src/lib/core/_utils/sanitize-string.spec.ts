@@ -1,3 +1,4 @@
+import { expect, describe, it } from 'vitest';
 import { validSchemaMock } from '../_mocks/schema.mocks';
 import { sanitizeString } from './sanitize-string';
 

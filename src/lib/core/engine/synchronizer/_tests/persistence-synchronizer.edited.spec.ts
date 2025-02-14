@@ -1,6 +1,7 @@
-import { compareArrays } from "../synchronize.fn";
-import type { TDataType } from "../synchronizer-state-detector.fn";
-import { addHash } from "./helpers";
+import { expect, describe, it } from 'vitest';
+import { compareArrays } from '../synchronize.fn';
+import type { TDataType } from '../synchronizer-state-detector.fn';
+import { addHash } from './helpers';
 
 const localClientId: string = 'local-client-id';
 const nonImportatLocalClientId: string = 'non-important-local-client-id';

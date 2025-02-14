@@ -18,7 +18,7 @@ yargs(hideBin(process.argv))
                 type: 'string',
             });
         },
-        (argv: any) => console.log(argv.note)
+        (argv: any) => console.log('Note:', argv.note)
     )
     .parse();
 

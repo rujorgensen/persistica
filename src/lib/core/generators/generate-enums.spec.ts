@@ -1,3 +1,4 @@
+import { expect, describe, it } from 'vitest';
 import { parseStringTypeUnionFromEnumBlock, parseStringTypeUnionsFromEnumBlocks } from './generate-enums';
 import { validSchemaMock } from '../_mocks/schema.mocks';
 import { splitSchema } from '../schema/split-schema';
