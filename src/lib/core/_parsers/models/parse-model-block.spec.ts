@@ -1,3 +1,4 @@
+import { expect, describe, it } from 'vitest';
 import { validModelMock } from "../../_mocks/schema.mocks";
 import { parseModelBlock } from "./parse-model-block";
 

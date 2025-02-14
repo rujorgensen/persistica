@@ -1,5 +1,15 @@
+/**
+ * @version 
+ *                  0.1.0
+ * 
+ * @changelog
+ *                  0.1.0, 2025.02.11
+ *                      - Initial version
+ * 
+ * @description
+ *                  Client side network connector and interface.
+ */
 import { BehaviorSubject, type Observable, take } from 'rxjs';
-import { syncDeletes } from './_helpers/helpers.fn';
 import type { IKnownPeer, INetworkState, TClientId } from './network.interfaces';
 import type { NetworkHostInterface } from './network-client-interface.class';
 import type { NetworkServer } from './abstract-network.server';

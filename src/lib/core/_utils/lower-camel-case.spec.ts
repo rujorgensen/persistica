@@ -1,5 +1,5 @@
 import { toLowerCamelCase } from './lower-camel-case';
-import { it, describe, expect } from 'bun:test';
+import { it, describe, expect } from 'vitest';
 
 describe('toLowerCamelCase', () => {
     it('should convert to lower camel case', () => {
