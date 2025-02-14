@@ -87,8 +87,11 @@ export abstract class SynchronizableStorage {
 }
 
 class NonMatchingVersionsError extends Error {
-    constructor() {
-        super('Non-matching versions');
+    constructor(
+        private readonly versionA: number,
+        private readonly versionB: number,
+    ) {
+        super(`Non-matching versions: '${versionA}'/'${versionB}'`);
     }
 }
 
@@ -232,8 +235,7 @@ export class Synchronizer {
 
                     return (storageIsReady === 'ready') && socketIsReady === 'ready';
                 }),
-            )
-            ;
+            );
 
         const matchingVersions$$: Observable<boolean> = forkJoin([
             of(1),// this._synchronizableStorage.version$$,
@@ -241,10 +243,8 @@ export class Synchronizer {
         ])
             .pipe(
                 map(([storageVersion, socketIVersion]: [number, number]) => {
-                    console.log({ storageVersion, socketIVersion });
-
                     if (storageVersion !== socketIVersion) {
-                        throw new NonMatchingVersionsError();
+                        throw new NonMatchingVersionsError(storageVersion, socketIVersion);
                     }
 
                     return storageVersion === socketIVersion;
