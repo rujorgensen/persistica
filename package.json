@@ -26,7 +26,7 @@
         "@hirez_io/observer-spy": "^2.2.0",
         "bufferutil": "^4.0.9",
         "fake-indexeddb": "^6.0.0",
-        "nanoid": "3.3.7",
+        "nanoid": "3.3.8",
         "object-hash": "3.0.0",
         "rxjs": "^7.8.1",
         "vite-tsconfig-paths": "^5.1.4",
