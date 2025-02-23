@@ -55,7 +55,7 @@ export const run = (
     for (const parsedBlock of parsedStoreBlocks) {
 
 
-        const fileName: string = generateFileName(parsedBlock.storeName, 'enum');
+        const fileName: string = generateFileName(parsedBlock.storeName, 'store');
 
         importFilesFrom.push(
             writeFile(

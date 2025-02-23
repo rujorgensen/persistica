@@ -13,6 +13,15 @@ export const validModelMock: string = sanitizeString(`model YtbChannel {
     createdAt               Date                    @default(now())
 }`);
 
+export const validModelMock2: string = sanitizeString(`model YtbVideo {
+    id                                              @id
+    videoId                 String                  @unique
+    channelDescription      String
+    createdAt               Date                    @default(now())
+    downloadState           VideoDownloadState      @default(WAITING)
+    downloadPath            String
+}`);
+
 export const validSchemaMock: string = sanitizeString(`generator client {
     output   = "./persistica/src/lib"
 }
@@ -26,14 +35,7 @@ ${validStoreMock}
 
 ${validModelMock}
 
-model YtbVideo {
-    id                                              @id
-    videoId                 String                  @unique
-    channelDescription      String
-    createdAt               Date                    @default(now())
-    downloadState           VideoDownloadState      @default(WAITING)
-    downloadPath            String
-}
+${validModelMock2}
 
 enum VideoDownloadState {
     WAITING

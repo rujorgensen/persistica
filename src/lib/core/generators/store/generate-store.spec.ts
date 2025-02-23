@@ -1,11 +1,9 @@
 import { expect, describe, it } from 'vitest';
-
 import { validSchemaMock, validStoreMock } from '../../_mocks/schema.mocks';
 import { splitSchema } from '../../schema/split-schema';
 import { parseInterfaceFromStoreDSL, parseInterfacesFromStoreBlocks } from './generate-store';
 
-
-describe('generateTypeUnionFromEnum', () => {
+describe('generateTypeUnionFromStore', () => {
     describe('full', () => {
         it('should parse enums', () => {
             const splitSchema_ = splitSchema(validSchemaMock);
