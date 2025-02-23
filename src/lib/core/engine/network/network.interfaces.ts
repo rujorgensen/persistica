@@ -11,6 +11,11 @@ export interface ITableDeletes {
     deletes: IDeleted[];
 }
 
+export interface ITableDeletes {
+    tableName: string;
+    deletes: IDeleted[];
+}
+
 export interface IKnownPeer {
     clientId: TClientId;
     lastSeenAt: Date;
