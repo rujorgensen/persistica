@@ -1,3 +1,4 @@
+import { it, describe, expect } from 'vitest';
 import { generateFileName } from './generate-filename';
 
 describe('generate-filename', () => {

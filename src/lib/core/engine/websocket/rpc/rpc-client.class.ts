@@ -4,7 +4,7 @@
 import type { IRPCCallback } from '../shared/websocket.interfaces';
 import type { RPCResponse, TCallback } from './rpc.interfaces';
 
-export class RPCClient {
+export class RPCClient<TMethods> {
     private requestId: number = 0;
     private readonly pendingRequests: Map<number, TCallback> = new Map();
 
@@ -15,14 +15,15 @@ export class RPCClient {
     ) { }
 
     /**
+     * Calls a function on the other side.
      * 
-     * @param method 
-     * @param params 
+     * @param { TMethods } method
+     * @param { any } params
      * 
      * @returns 
      */
     public call(
-        method: string,
+        method: TMethods,
         ...params: any
     ): Promise<any> {
         const id: number = this.requestId++;
@@ -56,7 +57,7 @@ export class RPCClient {
         const cb: TCallback | undefined = this.pendingRequests.get(response.id);
 
         if (cb) {
-            if (response.error){
+            if (response.error) {
                 throw new Error(response.error);
             }
 

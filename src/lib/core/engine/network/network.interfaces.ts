@@ -3,7 +3,7 @@ export type TClientId = `ci-${string}`;
 
 export interface IDeleted {
     cuid: string;
-    synchronizedWith: TClientId[];
+    synchronizedWith: ReadonlyArray<TClientId>;
 }
 
 export interface ITableDeletes {
@@ -21,6 +21,6 @@ export interface INetworkState {
     networkKey?: string; // Only keep locally, remove when transferring
     clientId: TClientId;
     version: number;
-    knownPeers: IKnownPeer[];
-    tableDeletes: ITableDeletes[];
+    knownPeers: ReadonlyArray<IKnownPeer>;
+    tableDeletes: ReadonlyArray<Readonly<ITableDeletes>>;
 }

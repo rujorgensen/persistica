@@ -2,6 +2,7 @@ import type { Observable } from 'rxjs';
 import type { TDataType } from '../synchronizer/synchronizer-state-detector.fn';
 import type { TUniqueIdentifier } from '../_types/element.type';
 import type { TSynchronizerState } from '../synchronizer/synchronizer';
+import type { TClientId } from './network.interfaces';
 
 /**
  * The interface that the server will use to register RPC functions
@@ -50,15 +51,17 @@ export interface IRegisterFunctions {
         rowIndex: number,
     ): Promise<string | undefined>;
 
-    // emitSynchronizationState(
-    //     state: TSynchronizerState,
-    // ): Promise<void>;
+    emitSynchronizationState(
+        state: TSynchronizerState,
+    ): Promise<void>;
 }
 
 /**
  * The interface to the network host
  */
 export abstract class NetworkHostInterface implements IRegisterFunctions {
+
+    public abstract readonly clientId: TClientId;
     public abstract readonly databaseHash$$: Observable<string>;
 
     /**

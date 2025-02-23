@@ -9,7 +9,7 @@ describe('sanitize-string', () => {
 
     it('should sanitize string #2', () => {
         expect(sanitizeString(validSchemaMock)).toBe(`generator client {
-output = "/home/rj/posium/libs/packages/persistica/src/lib"
+output = "./persistica/src/lib"
 }
 datasource db {
 provider = "sqlite"

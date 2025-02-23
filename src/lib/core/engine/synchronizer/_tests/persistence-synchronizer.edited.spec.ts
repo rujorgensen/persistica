@@ -7,7 +7,7 @@ const localClientId: string = 'local-client-id';
 const nonImportatLocalClientId: string = 'non-important-local-client-id';
 
 describe.skip('synchronizer [edited]', () => {
-    it.only('TCC2: should error as both are edited', () => {
+    it('TCC2: should error as both are edited', () => {
         let prevElement: TDataType<string> | undefined;
         const local: TDataType<string>[] = [
             {

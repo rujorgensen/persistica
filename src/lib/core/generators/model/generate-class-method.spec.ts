@@ -4,6 +4,6 @@ import { generateClassMethod } from "./generate-class-method";
 
 describe('generateClassMethod', () => {
     it('should generate class method', () => {
-        expect(generateClassMethod(validModelMock)).toBe(`public ytbChannel(\n    ): void {\n    }`);
+        expect(generateClassMethod(validModelMock)).toBe('public ytbChannel(\n    ): void {\n    }');
     });
 });

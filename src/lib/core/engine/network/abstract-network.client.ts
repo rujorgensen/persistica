@@ -1,4 +1,4 @@
-import type { NetworkHostInterface } from './network-client-interface.class';
+import type { NetworkHostInterface } from './network-host-interface.class';
 import type { INetworkState } from "./network.interfaces";
 
 export abstract class NetworkClient {

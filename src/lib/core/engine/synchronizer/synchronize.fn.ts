@@ -126,6 +126,6 @@ export const synchronize = <T>(
             return serverData;
         }
 
-        throw new Error('Unexpected: ' + state);
+        throw new Error(`Unexpected: ${state}`);
     };
 };

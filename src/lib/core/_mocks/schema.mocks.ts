@@ -8,7 +8,7 @@ export const validModelMock: string = sanitizeString(`model YtbChannel {
 }`);
 
 export const validSchemaMock: string = sanitizeString(`generator client {
-    output   = "/home/rj/posium/libs/packages/persistica/src/lib"
+    output   = "./persistica/src/lib"
 }
 
 datasource db {

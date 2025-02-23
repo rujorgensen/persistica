@@ -5,8 +5,8 @@ import type { RPCRequest, RPCResponse } from './rpc.interfaces';
 
 type TCallback = (...args: any) => any;
 
-export class RPCServer {
-    private readonly methods: Map<string, TCallback> = new Map();
+export class RPCServer<TMethodName extends string> {
+    private readonly methods: Map<TMethodName, TCallback> = new Map();
 
     /**
      * 
@@ -16,7 +16,7 @@ export class RPCServer {
      * @returns { void }
      */
     public registerMethod(
-        name: string,
+        name: TMethodName,
         fn: TCallback,
     ): void {
         this.methods.set(name, fn);
@@ -31,7 +31,7 @@ export class RPCServer {
      * @returns { void } 
      */
     public async handleMessage(
-        request: RPCRequest,
+        request: RPCRequest<TMethodName>,
 
         sendToRPCClient: (
             data: RPCResponse,

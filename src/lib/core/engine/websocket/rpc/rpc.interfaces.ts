@@ -1,8 +1,8 @@
 export type TCallback = (result: any) => void;
 
-export interface RPCRequest {
+export interface RPCRequest<TMethods> {
     id: number;
-    method: string;
+    method: TMethods;
     params: any[];
 }
 

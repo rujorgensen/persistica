@@ -1,5 +1,5 @@
 import { generateClientId, generateNetworkId, validateClientId, validateNetworkId } from './core/engine/network/_helpers/network.fn';
-import type { INetworkState, TClientId, TNetworkId } from './core/engine/network/network.interfaces';
+import type { INetworkState, ITableDeletes, TClientId, TNetworkId } from './core/engine/network/network.interfaces';
 import type { Observable } from 'rxjs';
 import { IndexedDBNetworkStore } from './core/engine/stores/indexeddb/indexeddb-network.store';
 
@@ -40,7 +40,6 @@ export class Persistica extends IndexedDBNetworkStore {
     }
 
     /**
-     * Use https://github.com/fingerprintjs/fingerprintjs??
      * @returns 
      */
     public readOrGenerateClientId(
@@ -106,20 +105,20 @@ export class Persistica extends IndexedDBNetworkStore {
     /**
      * Creates a new workspace.
      * 
-     * @param { string }    networkKey
+     * @param { string }    workspaceKey
      * 
      * @returns { INetworkState }
      */
     public createWorkspace(
-        networkKey?: string,
+        workspaceKey: string,
     ): INetworkState {
         return {
             networkId: generateNetworkId(),
-            networkKey: networkKey,
+            networkKey: workspaceKey,
             clientId: this.readOrGenerateClientId(),
             version: 1,
             knownPeers: [],
-            deletes: [],
+            tableDeletes: [],
         };
     }
 
@@ -127,13 +126,13 @@ export class Persistica extends IndexedDBNetworkStore {
      * Join a workspace that already exists, but has not already been used on this device.
      * 
      * @param { TNetworkId }    networkId
-     * @param { string }        [networkKey]
+     * @param { string }        networkKey
      * 
      * @returns { IPersisticaWorkspace }
      */
     public joinExistingWorkspace(
         networkId: TNetworkId,
-        networkKey?: string
+        networkKey: string
     ): IPersisticaWorkspace {
 
         if (
@@ -152,6 +151,7 @@ export class Persistica extends IndexedDBNetworkStore {
         };
     }
 }
+
 export class CurrentNetworkStore {
 
     constructor(
@@ -168,11 +168,31 @@ export class CurrentNetworkStore {
             );
     }
 
+    public read(
+    ): Promise<INetworkState> {
+        return this._networkStore.read(
+            this._networkId,
+        );
+    }
+
     public update(
         networkState: INetworkState,
     ): void {
         this._networkStore.update(
             networkState,
+        );
+    }
+
+    public async updateDeleteLog(
+        deletes: ReadonlyArray<Readonly<ITableDeletes>>,
+    ): Promise<void> {
+        const networkState: INetworkState = await this.read();
+
+        this._networkStore.update(
+            {
+                ...networkState,
+                tableDeletes: deletes,
+            },
         );
     }
 }

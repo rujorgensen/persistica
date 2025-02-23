@@ -1,17 +1,17 @@
 import {
     type Observable,
+    combineLatest,
     filter,
     firstValueFrom,
+    from,
     map,
-    startWith,
     switchMap,
 } from 'rxjs';
 import { DemoModel } from './demo.model';
 import type { DemoInterface } from './demo.interface';
 import { Network, type THandshakeState } from '../../lib/core/engine/network/network.class';
-import { PersisticaWebsocketClient, type TConnectionState } from '../../lib/core/engine/websocket/websocket.client';
-import type { INetworkState, TClientId } from '../../lib/core/engine/network/network.interfaces';
-import type { NetworkHostInterface } from '../../lib/core/engine/network/network-client-interface.class';
+import type { INetworkState, ITableDeletes, TClientId } from '../../lib/core/engine/network/network.interfaces';
+import type { NetworkHostInterface } from '../../lib/core/engine/network/network-host-interface.class';
 import {
     type TDateAsString,
     type TLocalStoreState,
@@ -23,6 +23,8 @@ import {
     NetworkWebsocketServer,
 } from '@persistica/core';
 import type { TDataType } from 'src/lib/core/engine/synchronizer/synchronizer-state-detector.fn';
+import { reactToSynchronizationStateChange } from 'src/lib/core/engine/base-line/react-to-synchronization-state.fn';
+import { LocalClient } from 'src/lib/core/client.class';
 
 export const instantiate = (
     db: IDBDatabase,
@@ -56,29 +58,28 @@ type TTableTypeMap = {
 
 type TDBTableType = 'DemoModel';
 
-export class Demo {
+export class Demo extends LocalClient {
 
     // * States
     public readonly storeState$$: Observable<TLocalStoreState>;
     public readonly networkState$$: Observable<THandshakeState>;
-    public readonly websocketState$$: Observable<TConnectionState>;
     public readonly synchronizerState$$: Observable<TSynchronizerState>;
-
-    protected readonly websocketClient: PersisticaWebsocketClient;
-    private readonly network: Network;
-
-    private readonly store: IndexedDBStore<TTableTypeMap, TDBTableType>;
 
     // * Models
     public readonly demoModel: DemoModel;
 
     // * Internal
+    private readonly network: Network;
+    private readonly store: IndexedDBStore<TTableTypeMap, TDBTableType>;
     private readonly _synchronizer$$: Observable<Synchronizer>;
 
     constructor(
         private readonly server: PersisticaWebsocketServer,
         private readonly networkState: INetworkState,
     ) {
+        super({
+            webSocketPort: 3_000,
+        });
 
         this.store = new IndexedDBStore(
             this.networkState.networkId,
@@ -93,7 +94,7 @@ export class Demo {
             },
 
             // Return unique identiier
-            {
+            <any>{
                 DemoModel: (
                     _element: unknown,
                 ) => {
@@ -102,12 +103,10 @@ export class Demo {
             },
         );
 
-        this.websocketClient = new PersisticaWebsocketClient(3_000);
-
         this.network = new Network(
             this.networkState,
             new NetworkWebsocketServer(
-                this.server,
+                this.server.rpcServer,
                 {
                     readBatchAt: <T>(
                         tableName: string,
@@ -123,7 +122,6 @@ export class Demo {
                         tableName: string,
                         index: number,
                     ): Promise<TDataType<T> | undefined> => {
-
                         console.log('readElementAt method not implemented.', { tableName, index });
 
                         throw new Error('readElementAt method not implemented.');
@@ -151,7 +149,7 @@ export class Demo {
                         tableName: string,
                         data: (string | number)[],
                     ): Promise<void> => {
-                        console.log(`Deleting ${data.length} element(s) from table "${tableName}" from network client`);
+                        console.log(`Deleting ${data.length} element(s) in table "${tableName}" from network client`);
 
                         await this.store.delete(tableName as any, data, true);
                     },
@@ -177,32 +175,80 @@ export class Demo {
                     ): Promise<string | undefined> => {
                         return Promise.resolve(this.store.readTableRowHash(tableName, rowIndex));
                     },
+
+                    emitSynchronizationState: (
+                        state: TSynchronizerState,
+                    ): Promise<void> => {
+                        return Promise.reject('toimplememtntne');
+                    },
                 },
             ),
             new NetworkWebsocketClient(this.websocketClient),
         );
 
-        this._synchronizer$$ = this.network
-            .networkHostInterfaces$$
+        const networkHostInterface$$: Observable<NetworkHostInterface> = this.network.networkHostInterfaces$$
             .pipe(
                 filter((state: Map<TClientId, NetworkHostInterface>) => state.size > 0),
                 map((state: Map<TClientId, NetworkHostInterface>) => {
-                    return new Synchronizer(
-                        this.store,
-                        state.entries().next().value[1],
-                    );
+                    if (state.size > 1) {
+                        throw new Error('Only one network host interface is supported at the moment.');
+                    }
+
+                    return state.entries().next().value[1];
                 }),
             );
+
+        this._synchronizer$$ = networkHostInterface$$
+            .pipe(
+                map((networkHostInterface: NetworkHostInterface) => new Synchronizer(
+                    [],// ! TODO
+                    [],// ! TODO
+                    this.store,
+                    networkHostInterface,
+                ),)
+            );
+
 
         this.storeState$$ = this.store.state$$;
         this.networkState$$ = this.network.state$$;
 
-        this.websocketState$$ = this.websocketClient.connectionState$$;
         this.synchronizerState$$ = this._synchronizer$$
             .pipe(
                 switchMap((a: Synchronizer) => a.state$$),
-                startWith('idle' as TSynchronizerState),
             );
+
+        // Attach logic to react to synchronization state changes
+        combineLatest([
+            this.synchronizerState$$,
+            networkHostInterface$$,
+            from(this.network.networkStore.read())
+        ])
+            .subscribe({
+                next: ([synchronizer, networkHostInterface, networkState]: [Synchronizer, NetworkHostInterface, INetworkState]) => {
+                    reactToSynchronizationStateChange(
+                        networkHostInterface.clientId,
+                        networkState.tableDeletes,
+                        (
+                            cb: (synchronizerState: TSynchronizerState) => Promise<void>,
+                        ) => {
+                            synchronizer.state$$.subscribe({ next: cb });
+                        },
+
+                        (
+
+                        ) => {
+                            return Promise.resolve(networkState.knownPeers.map((knownPeer: { clientId: TClientId }) => knownPeer.clientId));
+                        },
+
+                        (
+                            deletes: ReadonlyArray<Readonly<ITableDeletes>>,
+                        ) => {
+                            return this.network.networkStore.updateDeleteLog(deletes);
+                        },
+                    );
+                },
+                error: () => { },
+            });
 
         this.demoModel = new DemoModel(this.store);
     }

@@ -1,3 +1,4 @@
+import type { TSynchronizerState } from '../synchronizer/synchronizer';
 import type { INetworkState } from './network.interfaces';
 
 export abstract class NetworkServer {
@@ -6,4 +7,9 @@ export abstract class NetworkServer {
         fn: (
             peerNetworkState: INetworkState,
         ) => INetworkState): void;
+
+    public abstract onEmitSynchronizationState(
+        fn: (
+            state: TSynchronizerState,
+        ) => void): void;
 }

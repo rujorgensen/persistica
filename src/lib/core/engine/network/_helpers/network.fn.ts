@@ -7,6 +7,12 @@ export const generateNetworkId = (
     return `ni-${nanoid()}`;
 };
 
+/**
+ * 
+ * Use https://github.com/fingerprintjs/fingerprintjs?? 
+ * 
+ * @returns { TClientId } 
+ */
 export const generateClientId = (
 
 ): TClientId => {

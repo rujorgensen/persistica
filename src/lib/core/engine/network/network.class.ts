@@ -11,7 +11,7 @@
  */
 import { BehaviorSubject, type Observable, take } from 'rxjs';
 import type { IKnownPeer, INetworkState, TClientId } from './network.interfaces';
-import type { NetworkHostInterface } from './network-client-interface.class';
+import type { NetworkHostInterface } from './network-host-interface.class';
 import type { NetworkServer } from './abstract-network.server';
 import type { NetworkClient } from './abstract-network.client';
 import {
@@ -23,12 +23,13 @@ export type THandshakeState = 'disconnected' | 'connecting' | 'connected';
 
 export class Network {
     public readonly state$$: Observable<THandshakeState>;
+    public readonly networkStore: CurrentNetworkStore;
+
     private readonly _state$$: BehaviorSubject<THandshakeState> = new BehaviorSubject<THandshakeState>('disconnected');
 
     public readonly networkHostInterfaces$$: BehaviorSubject<Map<TClientId, NetworkHostInterface>> = new BehaviorSubject(new Map());
 
     private networkState: INetworkState;
-    private readonly _networkStore: CurrentNetworkStore;
 
     constructor(
         private readonly _initialNetworkState: INetworkState,
@@ -36,9 +37,9 @@ export class Network {
         private readonly _networkClient: NetworkClient,
     ) {
         this.networkState = structuredClone(this._initialNetworkState);
-        this._networkStore = new Persistica().getNetworkStore(_initialNetworkState.networkId);
+        this.networkStore = new Persistica().getNetworkStore(_initialNetworkState.networkId);
         this.state$$ = this._state$$.asObservable();
-        this._networkStore
+        this.networkStore
             .onUpdate$$()
             .subscribe({
                 next: (networkState: INetworkState | undefined) => {
@@ -96,7 +97,6 @@ export class Network {
 
         this.hostConnected(
             peerNetworkState.clientId,
-            peerNetworkState,
             peerNetworkClientInterface,
         );
     }
@@ -127,7 +127,6 @@ export class Network {
         peerNetworkState: INetworkState,
         networkKey?: string,
     ): INetworkState {
-        console.log(1);
         const isKnownPeer: boolean = this.isKnownPeer(peerClientId);
         if (
             // Unknown client
@@ -140,7 +139,7 @@ export class Network {
 
         this.clientConnected(
             peerClientId,
-            peerNetworkState,
+            //peerNetworkState,
         );
 
         return this.networkState;
@@ -151,7 +150,7 @@ export class Network {
     // ******************************************************************************
 
     /**
-     * Updates "lastSeenAt" and syncin deletes
+     * Updates "lastSeenAt" and synchronizing deletes
      * 
      * @param { TClientId }             clientId
      * @param { INetworkState }         networkState
@@ -161,12 +160,12 @@ export class Network {
      */
     private hostConnected(
         clientId: TClientId,
-        networkState: INetworkState,
+        //  networkState: INetworkState,
         hostNetworkClientInterface: NetworkHostInterface,
     ): void {
         this.clientConnected(
             clientId,
-            networkState,
+            //     networkState,
         );
 
         this.networkHostInterfaces$$
@@ -186,35 +185,32 @@ export class Network {
     }
 
     /**
-     * Updates "lastSeenAt" and synchronizing deletes
+     * Updates "lastSeenAt" and adds the peer.
      * 
      * @param { TClientId }         clientId
-     * @param { INetworkState }     networkState
      * 
      * @returns { void }
      */
     private clientConnected(
         clientId: TClientId,
-        networkState: INetworkState,
     ): void {
         const client: IKnownPeer | undefined = this.networkState.knownPeers.find((peer) => peer.clientId === clientId);
 
         if (client) {
             client.lastSeenAt = new Date();
+
+            this.networkStore.update(this.networkState);
         } else {
-            this.networkState.knownPeers.push({
-                clientId,
-                lastSeenAt: new Date(),
+            this.networkStore.update({
+                ...this.networkState,
+                knownPeers: [
+                    ...this.networkState.knownPeers,
+                    {
+                        clientId,
+                        lastSeenAt: new Date(),
+                    }]
             });
         }
-
-        this.networkState.deletes = syncDeletes(
-            clientId,
-            this.networkState.clientId,
-            this.networkState.deletes,
-            networkState.deletes,
-        );
-        this._networkStore.update(this.networkState);
 
         this._state$$.next('connected');
     }

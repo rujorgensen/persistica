@@ -260,17 +260,16 @@ export class MemoryStore<TableTypeMap, TableName extends string & keyof TableTyp
             this.events.emitDeleted(tableName, toReturn, internalOnly);
 
             return Promise.resolve(toReturn);
-        } else {
-            const existingData: TableTypeMap[TableName] | undefined = tableData.get(o);
+        }
 
-            if (existingData) {
-                tableData.delete(o);
+        const existingData: TableTypeMap[TableName] | undefined = tableData.get(o);
 
-                this.events.emitDeleted(tableName, [existingData], internalOnly);
+        if (existingData) {
+            tableData.delete(o);
 
-                return Promise.resolve(existingData);
-            }
+            this.events.emitDeleted(tableName, [existingData], internalOnly);
 
+            return Promise.resolve(existingData);
         }
 
         return Promise.resolve(undefined);

@@ -9,7 +9,7 @@
  * @description
  *                  This file contains the WebSocket server class.
  */
-import { BehaviorSubject, map, tap, type Observable } from 'rxjs';
+import { BehaviorSubject, map, type Observable } from 'rxjs';
 import WebSocket, { WebSocketServer, type MessageEvent } from 'ws';
 import type { IChannelMessage, TChannel, TMessage } from './shared/websocket.interfaces';
 import { RPCClient } from './rpc/rpc-client.class';
@@ -47,14 +47,15 @@ export class PersisticaWebsocketServer {
         ['version', new Set()],
         ['databaseHash', new Set()],
     ]);
-    public readonly rpcServer: RPCServer = new RPCServer();
+    public readonly rpcServer: RPCServer<'emitSynchronizationState' | 'joinNetwork'> = new RPCServer();
     public readonly connectedClients: Set<WebSocket> = new Set();
 
     constructor(
-        port: number,
+        private readonly port: number,
     ) {
-        console.log(`Creating WS server on port: ${port}`);
-        const webSocketServer = new WebSocketServer({ port });
+        console.log(`[WS Server] Creating WS server on port: ${this.port}`);
+
+        const webSocketServer = new WebSocketServer({ port: this.port });
 
         // * Register RPC methods
         this.isListening$$ = this.wss
@@ -64,19 +65,21 @@ export class PersisticaWebsocketServer {
 
         webSocketServer
             .on('listening', () => {
-                console.log(`WS Server is now listening on port ${port}`);
+                console.log('[WS Server] Now listening');
                 this.wss.next(webSocketServer);
             });
 
         webSocketServer
             .on('connection', (webSocket: WebSocket) => {
-                // * Register RPC methods (yes, the RPC client is on the server)
-                const rpcClient: RPCClient = new RPCClient(webSocket.send);
+                console.log('[WS Server] Client connected');
 
-                console.log('Connection established');
+                // * Register RPC methods (yes, the RPC client is on the server)
+                const rpcClient: RPCClient<'rpc-method-names'> = new RPCClient(webSocket.send);
 
                 this.connectedClients.add(webSocket);
-                webSocket.onerror = console.error;
+                webSocket.onerror = () => {
+                    console.error('[WS Server] Error');
+                }
 
                 webSocket.onmessage = (
                     event: MessageEvent,
@@ -119,7 +122,7 @@ export class PersisticaWebsocketServer {
                             rpcClient.handleMessage(payload);
 
                             break;
-                        case 'message':
+                        case 'message': {
                             const clients: Set<(data: unknown) => void> | undefined = this.channelListeners.get(payload.channel);
 
                             if (clients) {
@@ -129,20 +132,20 @@ export class PersisticaWebsocketServer {
                             }
 
                             break;
-
+                        }
                         default:
-                            console.log('[WebSocket] unhandled tpye:', type);
+                            console.log('[WS Server] unhandled tpye:', type);
                             break;
                     }
                 };
 
                 // Unsubscribe from all channels
                 webSocket.onclose = () => {
-                    this.channels.forEach((clients: Set<WebSocket>) => {
+                    for (const clients of this.channels.values()) {
                         if (clients.has(webSocket)) {
                             clients.delete(webSocket);
                         }
-                    });
+                    }
 
                     this.connectedClients.delete(webSocket);
                 };
@@ -192,11 +195,17 @@ export class PersisticaWebsocketServer {
      */
     public close(
     ): Promise<void> {
-        return new Promise((resolve, reject) => {
+        this.channels.clear();
 
+        for (const client of this.connectedClients) {
+            client.close(1001, 'Server is shutting down'); // 1001: Going away
+        }
+
+        return new Promise((resolve, reject) => {
             if (this.wss.value) {
                 this.wss.value.close(() => {
-                    console.log('WebSocket server closed');
+                    console.log('[WS Server] Server closed');
+                    this.wss.next(undefined);
                     resolve();
                 });
 

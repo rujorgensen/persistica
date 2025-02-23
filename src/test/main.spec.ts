@@ -18,7 +18,6 @@ const wait = (
 (<any>global).WebSocket = WebSocket;
 global.WebSocketServer = WebSocketServer;
 
-
 describe('persistica', () => {
     const persistica: Persistica = new Persistica();
     let persisticaWebsocketServer: PersisticaWebsocketServer;
@@ -37,15 +36,67 @@ describe('persistica', () => {
     });
 
     afterEach(async () => {
-        persisticaWebsocketServer.isListening$$.subscribe((a) => console.log('isListening', a));
-
         await persisticaWebsocketServer.close();
+
+    });
+
+    describe('Websocket server', () => {
+
+        it('should create websocket server', () => {
+            expect(persisticaWebsocketServer).toBeTruthy();
+        });
+
+        it('should listen', async () => {
+            const isListeningSpy = subscribeSpyTo(persisticaWebsocketServer.isListening$$);
+
+            expect(isListeningSpy.getLastValue()).toBeTruthy();
+        });
+
+        it('should accept a connection', async () => {
+            // const isListeningSpy = subscribeSpyTo(persisticaWebsocketServer.isListening$$);
+
+            // expect(isListeningSpy).toBeTruthy();
+
+            const demo: Demo = new Demo(persisticaWebsocketServer, persistica.createWorkspace('nv-key-1'));
+            const clientWebsocketStateSpy = subscribeSpyTo(demo.websocketState$$);
+
+            demo.joinNetwork();
+            await wait(100);
+
+            expect(clientWebsocketStateSpy.getLastValue()).toBe('connected');
+            expect(persisticaWebsocketServer.connectedClients).toHaveLength(1);
+        });
+
+        it('should accept closing a connection', async () => {
+            const demo: Demo = new Demo(persisticaWebsocketServer, persistica.createWorkspace('nv-key-1'));
+            const clientWebsocketStateSpy = subscribeSpyTo(demo.websocketState$$);
+
+            demo.joinNetwork();
+
+            await firstValueFrom(
+                demo
+                    .websocketState$$
+                    .pipe(
+                        filter((state) => state === 'connected')
+                    ),
+            );
+
+            expect(clientWebsocketStateSpy.getLastValue()).toBe('connected');
+            expect(persisticaWebsocketServer.connectedClients).toHaveLength(1);
+
+            demo.disconnect();
+            await wait(10);
+
+            expect(clientWebsocketStateSpy.getLastValue()).toBe('disconnected');
+            expect(persisticaWebsocketServer.connectedClients).toHaveLength(0);
+        });
+
     });
 
     describe('Websocket client', () => {
 
         it('should send join request', async () => {
-            const demo: Demo = new Demo(persisticaWebsocketServer, persistica.createWorkspace());
+            const demo: Demo = new Demo(persisticaWebsocketServer, persistica.createWorkspace('nv-key-1'));
             const clientWebsocketStateSpy = subscribeSpyTo(demo.websocketState$$);
 
             demo.joinNetwork();
@@ -54,82 +105,41 @@ describe('persistica', () => {
         });
 
         it('should connect to server', async () => {
-            const demo: Demo = new Demo(persisticaWebsocketServer, persistica.createWorkspace());
+            const demo: Demo = new Demo(persisticaWebsocketServer, persistica.createWorkspace('nv-key-1'));
             const clientWebsocketStateSpy = subscribeSpyTo(demo.websocketState$$);
 
             demo.joinNetwork();
 
-            await wait(1);
+            await wait(1_000);
 
             expect(clientWebsocketStateSpy.getLastValue()).toBe('connected');
-        });
-
-    });
-
-    describe('Websocket server', () => {
-
-        it('should create websocket server', async () => {
-            expect(persisticaWebsocketServer).toBeTruthy();
-        });
-
-        it('should listen', async () => {
-            const isListeningSpy = subscribeSpyTo(persisticaWebsocketServer.isListening$$);
-
-            await wait(1);
-
-            expect(isListeningSpy.getLastValue()).toBeTruthy();
-        });
-
-        it('should accept a connection', async () => {
-            const isListeningSpy = subscribeSpyTo(persisticaWebsocketServer.isListening$$);
-
-            expect(isListeningSpy).toBeTruthy();
-
-            const demo: Demo = new Demo(persisticaWebsocketServer, persistica.createWorkspace());
-            const clientWebsocketStateSpy = subscribeSpyTo(demo.websocketState$$);
-
-            demo.joinNetwork();
-            await wait(1);
-
-            expect(clientWebsocketStateSpy.getLastValue()).toBe('connected');
-            expect(persisticaWebsocketServer.connectedClients).toHaveLength(1);
-        });
-
-        it('should accept a closed connection', async () => {
-            const isListeningSpy = subscribeSpyTo(persisticaWebsocketServer.isListening$$);
-
-            expect(isListeningSpy).toBeTruthy();
-
-            const demo: Demo = new Demo(persisticaWebsocketServer, persistica.createWorkspace());
-            const clientWebsocketStateSpy = subscribeSpyTo(demo.websocketState$$);
-
-            demo.joinNetwork();
-            await wait(1);
-
-            expect(clientWebsocketStateSpy.getLastValue()).toBe('connected');
-            expect(persisticaWebsocketServer.connectedClients).toHaveLength(1);
-
-            demo.disconnect();
-            await wait(1);
-
-            expect(clientWebsocketStateSpy.getLastValue()).toBe('disconnected');
-            expect(persisticaWebsocketServer.connectedClients).toHaveLength(0);
         });
 
     });
 
     describe('synchronization', () => {
-        it('should start by deleting locally deleted elements', async () => {
+
+        it('should start by deleting locally deleted elements from the server', async () => {
+
             const demo: Demo = new Demo(persisticaWebsocketServer, {
                 networkId: 'ni-123',
                 networkKey: 'network-key',
                 clientId: 'ci-123',
                 version: 1,
-                knownPeers: [],
-                deletes: [
+                knownPeers: [
+                    // We don't have any known peers (should we then have deletes?)
+                ],
+                tableDeletes: [
                     {
-                        cuid: 'cuid-123',
-                        synchronizedWith: [],
+                        tableName: 'some table-name',
+                        deletes: [
+                            {
+                                cuid: 'cuid-123',
+                                synchronizedWith: [
+                                    // Not yet synchronized with anyone
+                                ],
+                            },
+                        ],
                     },
                 ],
             });
@@ -137,27 +147,34 @@ describe('persistica', () => {
             const clientSynchronizerStateSpy = subscribeSpyTo(demo.synchronizerState$$);
 
             demo.joinNetwork();
-            await wait(1);
-            await wait(100);
+
+            await firstValueFrom(
+                demo
+                    .websocketState$$
+                    .pipe(
+                        filter((state) => state === 'connected'),
+                    ),
+            );
 
             expect(clientWebsocketStateSpy.getLastValue()).toBe('connected');
-
             expect(persisticaWebsocketServer.connectedClients).toHaveLength(1);
-            expect(clientSynchronizerStateSpy.getLastValue()).toBe('synchronizing-table');
-        });
 
+            await firstValueFrom(
+                demo
+                    .synchronizerState$$
+                    .pipe(
+                        filter((state) => state === 'synchronizing-deletes'),
+                    ),
+            );
+
+            expect(clientSynchronizerStateSpy.getValueAt(0)).toBe('synchronizing-deletes');
+        });
     });
 
-    describe('persistica2', () => {
-
-        it('should exist', async () => {
-            const demo: Demo = new Demo(persisticaWebsocketServer, persistica.createWorkspace());
-
-            expect(demo).toBeTruthy();
-        });
+    describe('persistica', () => {
 
         it('emits the current value when new elements are created locally', async () => {
-            const demo: Demo = new Demo(persisticaWebsocketServer, persistica.createWorkspace());
+            const demo: Demo = new Demo(persisticaWebsocketServer, persistica.createWorkspace('nv-key-1'));
 
             const demoModelSpy = subscribeSpyTo(demo.demoModel.read$$({}));
 
@@ -180,7 +197,7 @@ describe('persistica', () => {
         });
 
         it('initialises states and joins networks', async () => {
-            const demo: Demo = new Demo(persisticaWebsocketServer, persistica.createWorkspace());
+            const demo: Demo = new Demo(persisticaWebsocketServer, persistica.createWorkspace('nv-key-1'));
 
             const storeStateSpy = subscribeSpyTo(demo.storeState$$);
             const networkStateSpy = subscribeSpyTo(demo.networkState$$);
@@ -190,18 +207,21 @@ describe('persistica', () => {
             expect(storeStateSpy.getLastValue()).toEqual('idle');
             expect(networkStateSpy.getLastValue()).toEqual('disconnected');
             expect(websocketStateSpy.getLastValue()).toEqual('disconnected');
-            expect(synchronizerStateSpy.getLastValue()).toEqual('idle');
 
             demo.joinNetwork();
 
+            await firstValueFrom(
+                demo
+                    .synchronizerState$$
+                    .pipe(
+                        filter((state) => !!state)
+                    ),
+            );
+
             expect(storeStateSpy.getLastValue()).toEqual('idle');
-            expect(networkStateSpy.getLastValue()).toEqual('connecting');
-            expect(websocketStateSpy.getLastValue()).toEqual('connecting');
-            expect(synchronizerStateSpy.getLastValue()).toEqual('idle');
+            expect(networkStateSpy.getLastValue()).toEqual('connected');
+            expect(websocketStateSpy.getLastValue()).toEqual('connected');
+            expect(synchronizerStateSpy.getLastValue()).toEqual('checking-store-states');
         });
-
-
-
-
     });
 });

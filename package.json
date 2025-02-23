@@ -10,7 +10,9 @@
     "scripts": {
         "upd": "ncu -i --format group",
         "test": "vitest",
-        "knip": "knip"
+        "knip": "knip",
+        "lint": "biome lint ./src",
+        "lint-fix": "biome lint --write --unsafe ./src"
     },
     "repository": {
         "type": "git",

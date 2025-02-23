@@ -12,79 +12,12 @@ import {
     tap,
 } from 'rxjs';
 import type { TLocalStoreState } from '../persistence.wrapper';
-import type { NetworkHostInterface } from '../network/network-client-interface.class';
+import type { NetworkHostInterface } from '../network/network-host-interface.class';
 import type { TDataType } from './synchronizer-state-detector.fn';
 import { findDivergence } from './_utils/find-divergence.fn';
-import type { TUniqueIdentifier } from '../_types/element.type';
-
-export abstract class SynchronizableStorage {
-    public abstract readonly hash$$: Observable<string>;
-    public abstract readonly state$$: Observable<TLocalStoreState>;
-
-    public abstract readonly onAnyCreate: (fn: (tn: string, v: ReadonlyArray<TDataType<any>>) => void) => void;
-    public abstract readonly onAnyUpdate: (fn: (tn: string, v: ReadonlyArray<TDataType<any>>) => void) => void;
-    public abstract readonly onAnyDelete: (fn: (tn: string, v: ReadonlyArray<TDataType<any>>) => void) => void;
-
-    public abstract create<T>(
-        tableName: string,
-        data: ReadonlyArray<TDataType<T>>,
-    ): Promise<void>;
-
-    public abstract update<T>(
-        tableName: string,
-        data: ReadonlyArray<TDataType<T>>,
-    ): Promise<void>;
-
-    public abstract delete(
-        tableName: string,
-        data: TUniqueIdentifier | TUniqueIdentifier[] | TDataType<any> | ReadonlyArray<TDataType<any>>,
-    ): Promise<void>;
-
-    public abstract rowIterator(
-        tableName: string,
-        value: (r: any) => void,
-    ): Promise<void>;
-
-    public abstract readTableNames(): ReadonlyArray<string>;
-
-    public abstract readElementAt: <T>(
-        tableName: string,
-        index: number,
-    ) => Promise<TDataType<T> | undefined>;
-
-    /**
-     * Gets the number of rows in the table
-     * 
-     * @param { string } tableName
-     * 
-     * @returns { Promise<number> }
-     */
-    public abstract readRowCount(
-        tableName: string,
-    ): Promise<number>;
-
-    /**
-     * 
-     * @param { string } tableName
-     * 
-     * @returns { Promise<string | undefined> }
-     */
-    public abstract readTableHash(
-        tableName: string,
-    ): Promise<string | undefined>;
-
-    /**
-     * 
-     * @param { string } tableName
-     * @param { number } rowIndex
-     * 
-     * @returns { Promise<string | undefined> }
-     */
-    public abstract readTableRowHash(
-        tableName: string,
-        rowIndex: number,
-    ): Promise<string | undefined>;
-}
+import type { ITableDeletes } from '../network/network.interfaces';
+import { replayDeletes } from './_utils/sync-deletes.fn';
+import type { SynchronizableStorage } from './abstract-synchronizable-storage.class';
 
 class NonMatchingVersionsError extends Error {
     constructor(
@@ -96,9 +29,10 @@ class NonMatchingVersionsError extends Error {
 }
 
 export type TSynchronizerState =
-    'idle' |
-    'non-matching-versions' |
     'waiting-for-readyness' |
+    'non-matching-versions' |
+    'synchronizing-deletes' |
+    //  'deletes-synchronized' |
     'checking-store-states' |
     'synchronizing-table' |
     'synchronized'
@@ -106,21 +40,35 @@ export type TSynchronizerState =
 
 export class Synchronizer {
     public readonly state$$: Observable<TSynchronizerState>;
-    private readonly state_$$: BehaviorSubject<TSynchronizerState> = new BehaviorSubject<TSynchronizerState>('idle');
+    private readonly state_$$: BehaviorSubject<TSynchronizerState> = new BehaviorSubject<TSynchronizerState>('waiting-for-readyness');
 
     private listen: boolean = false;
 
     constructor(
+        private readonly localTableDeletes: ReadonlyArray<Readonly<ITableDeletes>>,
+        private readonly remoteTableDeletes: ReadonlyArray<Readonly<ITableDeletes>>,
+
         private readonly _synchronizableStorage: SynchronizableStorage,
         private readonly _networkHostInterface: NetworkHostInterface,
     ) {
         this.state$$ = this.state_$$.asObservable();
 
-        this.state_$$.next('waiting-for-readyness');
+        this.state$$.subscribe({ next: async (state: TSynchronizerState) => await this._networkHostInterface.emitSynchronizationState(state) });
+
         // 1. Detect version of both persisted stores
         // 2. Detect the state of the storages
         this.waitForReadyness$$()
             .pipe(
+                switchMap(() => {
+                    this.state_$$.next('synchronizing-deletes');
+
+                    return from(replayDeletes(
+                        this.localTableDeletes,
+                        this.remoteTableDeletes,
+                        this._synchronizableStorage.delete.bind(this._synchronizableStorage),
+                        this._networkHostInterface.delete.bind(this._networkHostInterface),
+                    ));
+                }),
                 switchMap(() => {
                     this.state_$$.next('checking-store-states');
 
@@ -129,8 +77,6 @@ export class Synchronizer {
                         this._networkHostInterface.databaseHash$$.pipe(tap((a: string) => console.log('remote hash is', a))),
                     ])
                         .pipe(
-                            take(10),
-
                             switchMap(([localHash, remoteHash]: [string, string]) => {
                                 if (localHash === remoteHash) {
                                     this.state_$$.next('synchronized');
@@ -140,14 +86,16 @@ export class Synchronizer {
 
                                 // Read the number of rows in each table
                                 return forkJoin(this._synchronizableStorage.readTableNames()
-                                    .map((tableName: string) => combineLatest([
-                                        from(this._synchronizableStorage.readTableHash(tableName)),
-                                        from(this._networkHostInterface.readTableHash(tableName)),
-                                    ])
+                                    .map((tableName: string) => from(
+                                        Promise.all([
+                                            this._synchronizableStorage.readTableHash(tableName),
+                                            this._networkHostInterface.readTableHash(tableName),
+                                        ]),
+                                    )
                                         .pipe(
                                             map(async ([localTableHash, remoteTableHash]: [string | undefined, string | undefined]) => {
                                                 if (localTableHash !== remoteTableHash) {
-                                                    console.log(`${tableName} is out of sync, synchronizing`);
+                                                    console.log(`The table "${tableName}" is out of sync, synchronizing`);
                                                     this.state_$$.next('synchronizing-table');
 
                                                     await this.synchronizeTable(
@@ -158,36 +106,16 @@ export class Synchronizer {
                                                 return void 0;
                                             }),
                                         ),
-                                    ))
-                                    .pipe(
-                                        map(() => {
-
-                                            return void 0;
-                                        }),
-                                    )
-                                    ;
+                                    ));
                             }),
-
-                            // map(async ([localHash, remoteHash]: [string, string]) => {
-
-                            //     if (localHash === remoteHash) {
-                            //         this.state_$$.next('synchronized');
-
-                            //         return;
-                            //     }
-
-                            //     this.state_$$.next('synchronizing');
-
-                            //     await this.synchronizeInBatches(30);
-                            // }),
                         );
                 }),
             )
             .subscribe({
                 next: (): void => {
-
-                    //  this.state_$$.next('synchronized');
-                    console.log("DONE");
+                    this.listen = true;
+                    //   this.state_$$.next('synchronized');
+                    console.log("DONE synchronizing");
                 },
                 error: (error: unknown): void => {
                     if (error instanceof NonMatchingVersionsError) {
@@ -196,28 +124,28 @@ export class Synchronizer {
                 },
             });
 
-        this.liveUpdates();
+        this.bindToLiveUpdates();
     }
 
-    private liveUpdates(
+    /**
+     * Start detecting live updates
+     * 
+     * @returns { void }
+     */
+    private bindToLiveUpdates(
 
     ): void {
         this._synchronizableStorage.onAnyCreate((...args) => this.listen && this._networkHostInterface.create(...args));
         this._synchronizableStorage.onAnyUpdate((...args) => this.listen && this._networkHostInterface.update(...args));
-        this._synchronizableStorage.onAnyDelete((
-            tableName: string,
-            v: ReadonlyArray<TDataType<any>>,
-        ) => this.listen && this._networkHostInterface.delete(tableName, v));
+        this._synchronizableStorage.onAnyDelete((...args) => this.listen && this._networkHostInterface.delete(...args));
 
         this._networkHostInterface.onCreate((...args) => this.listen && this._synchronizableStorage.create(...args));
         this._networkHostInterface.onUpdate((...args) => this.listen && this._synchronizableStorage.update(...args));
-        this._networkHostInterface.onDelete((
-            tableName: string,
-            v: ReadonlyArray<TDataType<any>>,
-        ) => this.listen && this._synchronizableStorage.delete(tableName, v));
+        this._networkHostInterface.onDelete((...args) => this.listen && this._synchronizableStorage.delete(...args));
     }
 
     /**
+     * Wait for the local storage and the network host to be ready
      * 
      * @returns { Observable<boolean> }
      */
@@ -229,12 +157,9 @@ export class Synchronizer {
             this._synchronizableStorage.state$$.pipe(map(() => 'ready' as TLocalStoreState), take(1)),  // this.networkHostInterface$$.pipe(switchMap((a: NetworkHostInterface) => a.databaseHash$$)),
         ])
             .pipe(
-                map(([storageIsReady, socketIsReady]: [TLocalStoreState, TLocalStoreState]) => {
-
-                    console.log({ storageIsReady, socketIsReady });
-
-                    return (storageIsReady === 'ready') && socketIsReady === 'ready';
-                }),
+                map(([storageIsReady, socketIsReady]: [TLocalStoreState, TLocalStoreState]) =>
+                    (storageIsReady === 'ready') && (socketIsReady === 'ready'),
+                ),
             );
 
         const matchingVersions$$: Observable<boolean> = forkJoin([
@@ -263,10 +188,11 @@ export class Synchronizer {
     }
 
     /**
+     * Synchronizes a table
      * 
-     * @param tableName 
-     * @param tableSizes 
-     * @returns 
+     * @param { string } tableName
+     * 
+     * @returns { Promise<void> } 
      */
     private async synchronizeTable<T>(
         tableName: string,
@@ -279,7 +205,6 @@ export class Synchronizer {
             localRowCount: await this._synchronizableStorage.readRowCount(tableName),
             remoteRowCount: await this._networkHostInterface.readRowCount(tableName),
         };
-
 
         // One is completely empty
         if (tableSizes.localRowCount === 0) {
@@ -360,6 +285,7 @@ export class Synchronizer {
 
         // Find where the tables diverge
         const divergingIndex = 0;
+
         while (true) {
             const divergenceIndex: number = await findDivergence(
                 tableName,
@@ -374,4 +300,5 @@ export class Synchronizer {
 
         return Promise.resolve();
     }
+
 }

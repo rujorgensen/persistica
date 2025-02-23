@@ -54,7 +54,7 @@ export function replayAndUpdate$<T>(
 
                     for (const created of createdList) {
                         if (!filterNewOrUpdatedFn || filterNewOrUpdatedFn(created)) {
-                         
+
                             const existingElementIndex: number = cache.findIndex((el: T): boolean =>
                                 created[idkn] === el[idkn],
                             );
@@ -237,10 +237,10 @@ const onUpdate = <T>(
                 cache.splice(existingElementIndex, 1);
 
                 return [true, [...cache]];
-            } else {
-                // Just return
-                return [false, [...cache]];
             }
+
+            // Just return
+            return [false, [...cache]];
         }
 
         if (existingElementIndex > -1) {
@@ -248,11 +248,9 @@ const onUpdate = <T>(
             cache[existingElementIndex] = updated;
 
             return [true, [...cache]];
-        } else {
-            // Add it to the list if not existing
-            cache = [...cache, updated];
-
-            return [true, [...cache]];
         }
+
+        // Add it to the list if not existing
+        return [true, [...cache, updated]];
     };
 };

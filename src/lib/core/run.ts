@@ -21,7 +21,6 @@ export const run = (
     );
 
     const outputFolder: string = captureOutput(sanitizedFileContent);
-    console.log({ schema, outputFolder });
 
     // * 3 Parse 
     const parsedBlocks: IParsedEnumBlock[] = parseStringTypeUnionsFromEnumBlocks(schema.enumBlocks);

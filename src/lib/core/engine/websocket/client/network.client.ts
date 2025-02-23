@@ -1,10 +1,11 @@
 import { BehaviorSubject, filter, type Observable } from 'rxjs';
 import type { NetworkClient } from '../../network/abstract-network.client';
-import type { NetworkHostInterface } from '../../network/network-client-interface.class';
+import type { NetworkHostInterface } from '../../network/network-host-interface.class';
 import type { INetworkState } from '../../network/network.interfaces';
 import type { PersisticaWebsocketClient } from '../websocket.client';
 import type { TDataType } from '../../synchronizer/synchronizer-state-detector.fn';
 import type { TUniqueIdentifier } from '../../_types/element.type';
+import type { TSynchronizerState } from '../../synchronizer/synchronizer';
 
 /**
  * Filters off NULL and undefined, and provides type safety of type T.
@@ -30,6 +31,7 @@ class NetworkHostWebsocketInterface implements NetworkHostInterface {
     public readonly onDelete;
 
     constructor(
+        //  public readonly tableDeletes: ReadonlyArray<Readonly<ITableDeletes>>,
         private readonly _wsClient: PersisticaWebsocketClient,
     ) {
         this.databaseHash$$ = this._databaseHash$$
@@ -143,6 +145,15 @@ class NetworkHostWebsocketInterface implements NetworkHostInterface {
             rowIndex,
         );
     }
+
+    public emitSynchronizationState(
+        state: TSynchronizerState,
+    ): Promise<void> {
+        return this._wsClient.callRemoteProcedure(
+            'emitSynchronizationState',
+            state,
+        );
+    }
 }
 
 export class NetworkWebsocketClient implements NetworkClient {
@@ -183,7 +194,11 @@ export class NetworkWebsocketClient implements NetworkClient {
     }
 
     public getPeerInterface(
+        // tableDeletes: ReadonlyArray<Readonly<ITableDeletes>>,
     ): NetworkHostInterface {
-        return new NetworkHostWebsocketInterface(this._wsCLient);
+        return new NetworkHostWebsocketInterface(
+            //  tableDeletes,
+            this._wsCLient,
+        );
     }
 }
