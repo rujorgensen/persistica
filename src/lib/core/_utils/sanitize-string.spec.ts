@@ -16,7 +16,7 @@ provider = "sqlite"
 url = env("file:biograf.db")
 }
 store Configuration {
-apiKey String @unique
+apiKey String?
 rootFolder String?
 updatedAt Date @default(now()) @updatedAt
 }

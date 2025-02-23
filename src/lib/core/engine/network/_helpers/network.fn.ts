@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import type { TClientId, TNetworkId } from '../network.interfaces';
+import type { TClientId, TNetworkId } from '../network.interfaces.js';
 
 export const generateNetworkId = (
 

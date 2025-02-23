@@ -1,10 +1,14 @@
-import { sanitizeString } from './_utils/sanitize-string';
-import { generateFileName } from './file-handling/generate-filename';
-import { readFile } from './file-handling/read-file';
-import { writeFile } from './file-handling/write-file';
-import { type IParsedEnumBlock, parseStringTypeUnionsFromEnumBlocks } from './generators/generate-enums';
-import { type ISplitSchema, splitSchema } from './schema/split-schema';
-import { captureOutput } from './_utils/parsers.utils';
+import { sanitizeString } from './_utils/sanitize-string.js';
+import { generateFileName } from './file-handling/generate-filename.js';
+import { readFile } from './file-handling/read-file.js';
+import { writeFile } from './file-handling/write-file.js';
+import { type IParsedEnumBlock, parseStringTypeUnionsFromEnumBlocks } from './generators/enum/generate-enums.js';
+import { type ISplitSchema, splitSchema } from './schema/split-schema.js';
+import { captureOutput } from './_utils/parsers.utils.js';
+import {
+    type IParsedStoreBlock,
+    parseInterfacesFromStoreBlocks,
+} from './generators/store/generate-store.js';
 
 export const run = (
     filePath: string,
@@ -22,11 +26,15 @@ export const run = (
 
     const outputFolder: string = captureOutput(sanitizedFileContent);
 
-    // * 3 Parse 
-    const parsedBlocks: IParsedEnumBlock[] = parseStringTypeUnionsFromEnumBlocks(schema.enumBlocks);
 
     const importFilesFrom: string[] = [];
-    for (const parsedBlock of parsedBlocks) {
+
+    // ******************************************************************************
+    // *** Parse Enums
+    // ******************************************************************************
+    const parsedEnumBlocks: IParsedEnumBlock[] = parseStringTypeUnionsFromEnumBlocks(schema.enumBlocks);
+    for (const parsedBlock of parsedEnumBlocks) {
+
 
         const fileName: string = generateFileName(parsedBlock.enumName, 'enum');
 
@@ -39,6 +47,26 @@ export const run = (
             ),
         );
     }
+
+    // ******************************************************************************
+    // *** Parse Enums
+    // ******************************************************************************
+    const parsedStoreBlocks: IParsedStoreBlock[] = parseInterfacesFromStoreBlocks(schema.storeBlocks);
+    for (const parsedBlock of parsedStoreBlocks) {
+
+
+        const fileName: string = generateFileName(parsedBlock.storeName, 'enum');
+
+        importFilesFrom.push(
+            writeFile(
+                parsedBlock.definition,
+                fileName,
+                outputFolder,
+                'store',
+            ),
+        );
+    }
+
 
     // * Create index.ts
     console.log({ importFilesFrom });

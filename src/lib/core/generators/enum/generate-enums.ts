@@ -1,5 +1,5 @@
-import type { TEnumBlock } from '../schema/split-schema';
-import { BASE_DATA_TYPES } from '../data-types/base-data-types';
+import type { TEnumBlock } from '../../schema/split-schema.js';
+import { BASE_DATA_TYPES } from '../../data-types/base-data-types.js';
 
 export interface IParsedEnumBlock {
     enumName: string;

@@ -1,6 +1,6 @@
-import { toLowerCamelCase } from "../../_utils/lower-camel-case";
-import type { TBaseType } from "../../data-types/base-data-types";
-import type { TModelBlock } from "../../schema/split-schema";
+import { toLowerCamelCase } from '../../_utils/lower-camel-case.js';
+import type { TBaseType } from '../../data-types/base-data-types.js';
+import type { TModelBlock } from '../../schema/split-schema.js';
 
 // SQLite:
 

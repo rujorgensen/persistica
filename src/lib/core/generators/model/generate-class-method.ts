@@ -1,5 +1,5 @@
-import { type IParsedModelBlock, parseModelBlock } from '../../_parsers/models/parse-model-block';
-import type { TModelBlock } from '../../schema/split-schema';
+import { type IParsedModelBlock, parseModelBlock } from '../../_parsers/models/parse-model-block.js';
+import type { TModelBlock } from '../../schema/split-schema.js';
 
 export const generateClassMethod = (
     modelBlock: TModelBlock,

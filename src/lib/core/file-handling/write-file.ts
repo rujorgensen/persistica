@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import type { TFileType } from './generate-filename';
+import type { TFileType } from './generate-filename.js';
 
 export const writeFile = (
     fileContent: string,
@@ -15,18 +15,24 @@ export const writeFile = (
     switch (fileType) {
         case 'model':
             importFrom = path.join('client', 'models', fileName);
-            fullPath = path.join(folderName, 'dist', 'client', 'models', fileName);
+            fullPath = path.join(folderName, 'client', 'models', fileName);
             break;
         case 'store':
             importFrom = path.join('client', 'stores', fileName);
-            fullPath = path.join(folderName, 'dist', 'client', 'stores', fileName);
+            fullPath = path.join(folderName, 'client', 'stores', fileName);
             break;
         case 'enum':
             importFrom = path.join('client', 'enums', fileName);
-            fullPath = path.join(folderName, 'dist', 'client', 'enums', fileName);
+            fullPath = path.join(folderName, 'client', 'enums', fileName);
             break;
         default:
             throw new Error(`Unsupported file type: ${fileType}`);
+    }
+
+    // Creating the directory if it doesn't exist
+    const directory = path.dirname(fullPath);
+    if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
     }
 
     // Write the file to disk

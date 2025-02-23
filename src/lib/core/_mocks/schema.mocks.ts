@@ -1,4 +1,10 @@
-import { sanitizeString } from '../_utils/sanitize-string';
+import { sanitizeString } from '../_utils/sanitize-string.js';
+
+export const validStoreMock: string = sanitizeString(`store Configuration {
+    apiKey                  String?
+    rootFolder              String?
+    updatedAt               Date                @default(now())     @updatedAt
+}`);
 
 export const validModelMock: string = sanitizeString(`model YtbChannel {
     id                                              @id
@@ -16,11 +22,7 @@ datasource db {
     url      = env("file:biograf.db")
 }
 
-store Configuration {
-    apiKey                  String                  @unique
-    rootFolder              String?
-    updatedAt               Date                    @default(now())     @updatedAt
-}
+${validStoreMock}
 
 ${validModelMock}
 

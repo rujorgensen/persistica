@@ -1,7 +1,7 @@
-import { generateClientId, generateNetworkId, validateClientId, validateNetworkId } from './core/engine/network/_helpers/network.fn';
-import type { INetworkState, ITableDeletes, TClientId, TNetworkId } from './core/engine/network/network.interfaces';
 import type { Observable } from 'rxjs';
-import { IndexedDBNetworkStore } from './core/engine/stores/indexeddb/indexeddb-network.store';
+import { generateClientId, generateNetworkId, validateClientId, validateNetworkId } from './core/engine/network/_helpers/network.fn.js';
+import type { INetworkState, ITableDeletes, TClientId, TNetworkId } from './core/engine/network/network.interfaces.js';
+import { IndexedDBNetworkStore } from './core/engine/stores/indexeddb/indexeddb-network.store.js';
 
 const PERSISTICA_KEY_PREFIX = 'persistica-';
 
@@ -15,7 +15,8 @@ export interface IPersisticaWorkspace {
 const validateWorkspaceConfiguration = (
     possibleWorkspace: unknown,
 ): possibleWorkspace is IPersisticaWorkspace => {
-    return typeof possibleWorkspace === 'object' &&
+    return !!possibleWorkspace &&
+        typeof possibleWorkspace === 'object' &&
         (
             ('networkKey' in possibleWorkspace) ?
                 typeof (possibleWorkspace as IPersisticaWorkspace).networkKey === 'string'
@@ -84,7 +85,7 @@ export class Persistica extends IndexedDBNetworkStore {
             }
 
             // Validate each element
-            if (options.throwOnInvalidWorkspaces) {
+            if (options?.throwOnInvalidWorkspaces) {
                 if (!possibleWorkspaces.every(validateWorkspaceConfiguration)) {
                     throw new Error('Failed to read workspaces. Invalid workspace configuration.');
                 }
