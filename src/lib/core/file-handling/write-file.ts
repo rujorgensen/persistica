@@ -14,16 +14,16 @@ export const writeFile = (
     let fullPath: string;
     switch (fileType) {
         case 'model':
-            importFrom = path.join('client', 'models', fileName);
-            fullPath = path.join(folderName, 'client', 'models', fileName);
+            importFrom = path.join(fileName);
+            fullPath = path.join(folderName, fileName);
             break;
         case 'store':
-            importFrom = path.join('client', 'stores', fileName);
-            fullPath = path.join(folderName, 'client', 'stores', fileName);
+            importFrom = path.join(fileName);
+            fullPath = path.join(folderName, fileName);
             break;
         case 'enum':
-            importFrom = path.join('client', 'enums', fileName);
-            fullPath = path.join(folderName, 'client', 'enums', fileName);
+            importFrom = path.join(fileName);
+            fullPath = path.join(folderName, fileName);
             break;
         default:
             throw new Error(`Unsupported file type: ${fileType}`);

@@ -1,6 +1,6 @@
 import type { TModelBlock } from '../../schema/split-schema.js';
 import { BASE_DATA_TYPES } from '../../data-types/base-data-types.js';
-import { validateModel } from '../parsers/validate-model.js';
+import { validateModel } from './parsers/validate-model.js';
 
 export interface IParsedModelBlock {
     modelName: string;
