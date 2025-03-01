@@ -2,6 +2,16 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import type { TFileType } from './generate-filename.js';
 
+/**
+ * Writes a file to disc and returns its path.
+ * 
+ * @param { string } fileContent
+ * @param { string } fileName
+ * @param { string } folderName
+ * @param { TFileType } fileType
+ * 
+ * @returns { string }
+ */
 export const writeFile = (
     fileContent: string,
     fileName: string,
