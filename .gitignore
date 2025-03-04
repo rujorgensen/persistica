@@ -1,5 +1,5 @@
 # Workspace
-node_modules
+node_modules/
 dist
 
 # IDE and Editor settings
