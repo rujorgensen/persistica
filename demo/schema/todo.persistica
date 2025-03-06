@@ -1,0 +1,23 @@
+generator client {
+    name    = "todo"
+    output  = "./demo/src/_persistica"
+}
+
+datasource {
+    provider = "sqlite"
+    url      = env("file:todo.db")
+}
+
+model Todo {
+    id                      @id
+    description             String
+    isCompleted             Boolean             @default(false)
+    priority                EPriority           @default(NORMAL)
+    createdAt               Date                @default(now())
+    updatedAt               Date?               @default(now())     @updatedAt
+}
+
+enum EPriority {
+    NORMAL
+    HIGH
+}

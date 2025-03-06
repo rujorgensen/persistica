@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "baseUrl": ".",
+        "module": "nodenext",
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "esModuleInterop": true,
+        "strict": true,
+        "paths": {
+            "@persistica/core": [
+                "src/lib/core/index.ts"
+            ],
+            "@persistica": [
+                "src/lib/index.ts"
+            ],
+        }
+    }
+}

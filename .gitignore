@@ -1,0 +1,10 @@
+# Workspace
+node_modules/
+dist
+
+# IDE and Editor settings
+.vscode/
+
+# Environment and secrets
+.env
+.env.*

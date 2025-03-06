@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Todo App Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="main.ts"></script>
+</head>
+
+<body>
+    <div x-data="todoApplication()">
+        <div class="container">
+            <h1>Todo app</h1>
+            <input id="new-todo" type="text" x-model="message" @keyup.enter="enter()" placeholder="Add a new todo...">
+            <ul id="todo-list">
+                <template x-for="todo in todos">
+                    <li class="todo-item" :class="todo.isCompleted ? 'done' : ''">
+                        <span x-text="todo.description" @click="toggleState(todo)"></span>
+                        <button class="delete" @click="remove(todo)">
+                            ✕
+                        </button>
+                    </li>
+                </template>
+            </ul>
+        </div>
+
+        <p>Value: <span x-text="value"></span></p>
+    </div>
+</body>
+
+</html>

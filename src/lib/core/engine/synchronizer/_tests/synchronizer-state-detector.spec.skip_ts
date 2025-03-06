@@ -1,0 +1,191 @@
+import { TUniqueIdentifier } from "../../_types/element.type";
+import { detectState } from "../synchronizer-state-detector.fn";
+
+describe.skip('detectState', () => {
+    // ****************************************************************************
+    // *** Added
+    // ****************************************************************************
+    it('should throw if both are undefined', () => {
+        expect(() => {
+            detectState(
+                undefined,
+                undefined,
+                'pcuid',
+                'local-client-id',
+            );
+        }).toThrow('At least one value must be defined');
+    });
+
+    it('should detect in-sync state', () => {
+        expect(detectState(
+            {
+                d: 'a',
+                pcuid: '0',     // Points back to the element before
+                hash: 'a',
+                createdBy: 'some-client-id',
+            },
+            {
+                d: 'a',
+                pcuid: '0',     // Points back to the element before
+                hash: 'a',
+                createdBy: 'some-client-id',
+            },
+            'pcuid',
+            'local-client-id',
+        )).toBe('in-sync');
+    });
+
+    // ****************************************************************************
+    // *** Added
+    // ****************************************************************************
+    it('should detect created-locally state (missing on remote)', () => {
+        expect(detectState(
+            {
+                d: 'a',
+                cuid: 'a',
+                pcuid: '0',     // Points back to the element before
+                hash: 'a',
+                createdBy: 'local-client-id',
+            },
+            undefined,
+            'pcuid',
+            'local-client-id',
+        )).toBe('created-locally');
+    });
+
+    it('should detect created-locally state (something else found on remote)', () => {
+        expect(detectState<{ cuid: TUniqueIdentifier; }>(
+            {
+
+                cuid: 'a',
+                pcuid: '0',     // Points back to the element before
+                hash: 'a',
+                createdBy: 'local-client-id',
+            },
+            {
+
+                cuid: 'b',
+                hash: 'b',
+                pcuid: 'not-decided-while-testing',
+                createdBy: 'some-client-id',
+            },
+            'cuid',
+            'local-client-id',
+        )).toBe('created-locally');
+    });
+
+    it('should detect created-locally state (nothing found on remote)', () => {
+        expect(detectState(
+            {
+                d: 'a',
+                cuid: 'a',
+                pcuid: 'b',
+                hash: 'a',
+                createdBy: 'local-client-id',
+            },
+            undefined,
+            'local-client-id',
+        )).toBe('created-locally');
+    });
+
+    it('should detect created-elsewhere state', () => {
+        expect(detectState(
+            {
+                d: 'a',
+                cuid: 'a',
+                pcuid: '0',     // Points back to the element before
+                hash: 'a',
+                createdBy: 'some-client-id',
+            },
+            {
+                d: 'a',
+                cuid: 'b',
+                hash: 'b',
+                createdBy: 'another-client-id',
+                pcuid: '0',
+            },
+            'local-client-id',
+        )).toBe('created-elsewhere');
+    });
+
+    it('should detect created-elsewhere state (nothing found locally)', () => {
+        expect(detectState(
+            undefined,
+            {
+                d: 'a',
+                cuid: 'b',
+                hash: 'b',
+                createdBy: 'another-client-id',
+                pcuid: '0',
+            },
+            'local-client-id',
+        )).toBe('created-elsewhere');
+    });
+
+    // ****************************************************************************
+    // *** Edited
+    // ****************************************************************************
+    it('should detect edited-locally state', () => {
+        expect(detectState(
+            {
+                d: 'b',
+                cuid: 'a',
+                pcuid: '0',     // Points back to the element before
+                hash: 'b',
+                editedBy: 'local-client-id',
+                createdBy: 'some-client-id',
+            },
+            {
+                d: 'a',
+                cuid: 'a',
+                pcuid: '0',     // Points back to the element before
+                hash: 'a',
+                createdBy: 'some-client-id',
+            },
+            'local-client-id',
+        )).toBe('edited-locally');
+    });
+
+    it('should detect edited-elsewhere state', () => {
+        expect(detectState(
+            {
+                d: 'b',
+                cuid: 'a',
+                pcuid: '0',     // Points back to the element before
+                hash: 'b',
+                createdBy: 'some-client-id',
+            },
+            {
+                d: 'a',
+                cuid: 'a',
+                pcuid: '0',     // Points back to the element before
+                hash: 'a',
+                // editedBy: 'another-client-id',
+                createdBy: 'some-client-id',
+            },
+            'local-client-id',
+        )).toBe('edited-elsewhere');
+    });
+
+    it('should detect edited-both state', () => {
+        expect(detectState(
+            {
+                d: 'b',
+                cuid: 'a',
+                pcuid: '0',     // Points back to the element before
+                hash: 'b',
+                editedBy: 'local-client-id',
+                createdBy: 'some-client-id',
+            },
+            {
+                d: 'a',
+                cuid: 'a',
+                pcuid: '0',     // Points back to the element before
+                hash: 'a',
+                createdBy: 'some-client-id',
+            },
+            'local-client-id',
+        )).toBe('edited-locally');
+    });
+
+});
