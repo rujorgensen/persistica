@@ -1,10 +1,24 @@
 import { watch } from 'node:fs';
 import { $ } from 'bun';
 
+const clearAndBuild = async (
+
+) => {
+    console.log('Rebuilding...');
+    // Clear dist folder
+    await $`rm -rf ./demo/dist`;
+
+    // Rebuild
+    await buildFrontend();
+
+}
 // await $`bun --hot run ./demo/server.ts`;
 // Create a Set to store all connected WebSocket clients
 const clients: Set<ReadableStreamDirectController> = new Set();
 
+/**
+ * Watch files for changes, and rebuild and reload server
+ */
 const watcher = watch(
     import.meta.dir,
     {
@@ -17,11 +31,9 @@ const watcher = watch(
             // 
             //    await $`persistica --configuration=./demo/schema/todo.persistica`;
 
-            // Clear dist folder
-            await $`rm -rf ./demo/dist`;
+            await clearAndBuild();
 
-            // Rebuild
-            await build();
+            console.log('Reloading server...');
 
             // Restart server
             server.reload(serverConf);
@@ -44,20 +56,20 @@ process.on('SIGINT', () => {
     process.exit(0);
 });
 
-const build = async () => {
+const buildFrontend = async () => {
     await Bun.build({
         entrypoints: [
             './demo/src/client/index.html',
         ],
         // sourcemap: 'inline',
-        outdir: './demo/dist',
+        outdir: './demo/dist/frontend',
         minify: false,
     });
 }
 
 const serverConf = {
     port: 3000,
-    fetch: async (request) => {
+    fetch: async (request: Request) => {
         const url = new URL(request.url);
         // Serve index.html for root
         const pathname = url.pathname === '/' ? '/index.html' : url.pathname;
@@ -87,7 +99,7 @@ const serverConf = {
                 );
             }
 
-            const file = Bun.file(`./demo/dist${pathname}`);
+            const file = Bun.file(`./demo/dist/frontend${pathname}`);
 
             if (pathname === '/index.html') {
                 const text = await file.text();
@@ -109,6 +121,10 @@ const serverConf = {
         }
     },
 };
+
+await clearAndBuild();
+
+await $`bun --hot run ./demo/src/server/server.ts`;
 
 const server = Bun.serve(serverConf);
 console.log('🚀 Demo server running on http://localhost:3000');
