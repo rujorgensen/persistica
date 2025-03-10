@@ -13,21 +13,25 @@ const persistica: Persistica = new Persistica();
 const currentNetworkStore: CurrentNetworkStore = persistica.getNetworkStore('ni-ZFQ9QzK9oSHpCGRU70uF8');
 const currentNetworkState: INetworkState = (await currentNetworkStore.read()) || persistica.createWorkspace('my-secret-key');
 
-const todo = new Todo(currentNetworkState);
+const todo = new Todo(
+    currentNetworkState,
+    {
+        webSocketPort: 3_001,
+    },
+);
 
 // Define observable component
 Alpine.data('todoApplication', () => ({
-    value: "Loading...",
     message: '',
-    pTodos: [],
-    todos: [],
+    todos: <ITodo[]>[],
     init() {
         console.log('🚀 Todo Application is live');
+        todo.todoModel.read$$({
 
-        todo.todoModel.read$$({})
+        })
             .subscribe({
                 next: (todos: ITodo[]) => {
-                    this.todos = <any>todos;
+                    this.todos = todos;
                 },
             });
     },
@@ -53,9 +57,12 @@ Alpine.data('todoApplication', () => ({
     },
 
     toggleState(
-        todo: ITodo,
+        todo_: ITodo,
     ) {
-        todo.isCompleted = !todo.isCompleted;
+        todo.todoModel.update({
+            ...todo_,
+            isCompleted: !todo_.isCompleted,
+        })
     },
 }));
 
