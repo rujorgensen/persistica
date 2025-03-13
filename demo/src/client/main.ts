@@ -6,8 +6,12 @@ import {
 } from '@persistica';
 import type {
     INetworkState,
+    TLocalStoreState,
+    TSynchronizerState,
 } from '@persistica/core';
 import type { ITodo } from '../_persistica/todo.primitives.js';
+import type { TConnectionState } from 'src/lib/core/engine/websocket/websocket.client.js';
+import type { THandshakeState } from 'src/lib/core/engine/client/network/network.class.js';
 
 const persistica: Persistica = new Persistica();
 const currentNetworkStore: CurrentNetworkStore = persistica.getNetworkStore('ni-ZFQ9QzK9oSHpCGRU70uF8');
@@ -22,10 +26,49 @@ const todo = new Todo(
 
 // Define observable component
 Alpine.data('todoApplication', () => ({
+    persistica: todo,
+    websocketState: <TConnectionState | null>'loading',// : Observable<TConnectionState>;
+    storeState: <TLocalStoreState | 'loading'>'loading',// : Observable<TLocalStoreState>;
+    networkState: <THandshakeState | 'loading'>'loading',// : Observable<THandshakeState>;
+    synchronizerState: <TSynchronizerState | 'loading'>'loading',// : Observable<TSynchronizerState>;
+
     message: '',
     todos: <ITodo[]>[],
     init() {
         console.log('🚀 Todo Application is live');
+
+        todo.websocketState$$
+            .subscribe({
+                next: (websocketState: TConnectionState) => {
+                    console.log('websocketState updated', websocketState);
+                    this.websocketState = websocketState;
+                },
+            });
+
+        todo.storeState$$
+            .subscribe({
+                next: (storeState: TLocalStoreState) => {
+                    console.log('storeState updated', storeState);
+                    this.storeState = storeState;
+                },
+            });
+
+        todo.networkState$$
+            .subscribe({
+                next: (networkState: THandshakeState) => {
+                    console.log('networkState updated', networkState);
+                    this.networkState = networkState;
+                },
+            });
+
+        todo.synchronizerState$$
+            .subscribe({
+                next: (synchronizerState: TSynchronizerState) => {
+                    console.log('synchronizerState updated', synchronizerState);
+                    this.synchronizerState = synchronizerState;
+                },
+            });
+
         todo.todoModel.read$$({
 
         })
@@ -34,6 +77,10 @@ Alpine.data('todoApplication', () => ({
                     this.todos = todos;
                 },
             });
+
+        setTimeout(() => {
+            this.persistica.joinNetwork();
+        }, 500);
     },
     enter() {
         if (this.message.trim() !== "") {

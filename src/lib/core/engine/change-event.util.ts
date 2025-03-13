@@ -191,9 +191,9 @@ export function replayAndUpdateSingle$<T>(
             .pipe(
                 map(v => (Array.isArray(v) ? v : [v]) as ReadonlyArray<T>),
                 map((deletedList: ReadonlyArray<T>): boolean => {
-                    const findUpdated: T | undefined = deletedList.find((c: T) => c[idkn] === cuid);
+                    const findDeleted: T | undefined = deletedList.find((c: T) => c[idkn] === cuid);
 
-                    if (!findUpdated) {
+                    if (!findDeleted) {
                         return false;
                     }
 

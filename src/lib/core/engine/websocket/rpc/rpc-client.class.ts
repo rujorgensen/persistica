@@ -1,8 +1,8 @@
 /**
  * The class to handling the *calling* side of the RPC.
  */
-import type { IRPCCallback } from '../shared/websocket.interfaces';
-import type { RPCResponse, TCallback } from './rpc.interfaces';
+import type { IRPCCallback } from '../shared/websocket.interfaces.ts';
+import type { RPCResponse, TCallback } from './rpc.interfaces.ts';
 
 export class RPCClient<TMethods> {
     private requestId: number = 0;

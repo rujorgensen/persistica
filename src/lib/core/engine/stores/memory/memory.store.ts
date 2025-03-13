@@ -5,10 +5,10 @@ import {
     BehaviorSubject,
     map,
 } from 'rxjs';
-import { ListenerHandler } from '../listeners.class';
-import type { PersistenceWrapper, TLocalStoreState } from '../../persistence.wrapper';
-import { hashAll } from '../_utils/db.class';
-import { hashTables } from './hash.utils';
+import { ListenerHandler } from '../listeners.class.js';
+import type { PersistenceWrapper, TLocalStoreState } from '../../persistence.wrapper.js';
+import { hashAll } from '../_utils/db.class.js';
+import { hashTables } from './hash.utils.js';
 import type {
     TTableDefinition,
     TUniqueIdentifier,

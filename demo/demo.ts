@@ -57,6 +57,7 @@ process.on('SIGINT', () => {
 });
 
 const buildFrontend = async () => {
+    console.log('Rebuilding...');
     await Bun.build({
         entrypoints: [
             './demo/src/client/index.html',
@@ -124,7 +125,15 @@ const serverConf = {
 
 await clearAndBuild();
 
-await $`bun --hot run ./demo/src/server/server.ts`;
+// Don't await, as it will never resolve
+$`bun --hot run ./demo/src/server/server.ts`
+    .then(() => {
+        console.log('Server exited');
+    })
+    .catch((error) => {
+        console.error('Server error', error);
+    });
 
-const server = Bun.serve(serverConf);
-console.log('🚀 Demo server running on http://localhost:3000');
+
+server = Bun.serve(serverConf);
+console.log(`🚀 Demo server running on http://localhost:${serverConf.port}`);

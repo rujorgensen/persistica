@@ -33,7 +33,7 @@ export {
 // * Network
 export {
     Network,
-} from './engine/network/network.class.js';
+} from './engine/client/network/network.class.js';
 
 export {
     generateClientId,

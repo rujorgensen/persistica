@@ -6,27 +6,43 @@
     <title>Todo App Demo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script type="module" src="main.ts"></script>
 </head>
 
 <body>
     <div x-data="todoApplication()">
-        <div class="container">
-            <h1>Todo app</h1>
-            <input id="new-todo" type="text" x-model="message" @keyup.enter="enter()" placeholder="Add a new todo...">
-            <ul id="todo-list">
-                <template x-for="todo in todos">
-                    <li class="todo-item" :class="todo.isCompleted ? 'done' : ''">
-                        <span x-text="todo.description" @click="toggleState(todo)"></span>
-                        <button class="delete" @click="remove(todo)">
-                            ✕
-                        </button>
-                    </li>
-                </template>
-            </ul>
-        </div>
 
-        <p>Value: <span x-text="value"></span></p>
+        <div id="panel-container">
+            <h1>Todo app</h1>
+
+            <header class="statuses">
+                <label for="ws-state">websocket:</label>
+                <label for="store-state">store:</label>
+                <label for="nw-state">network:</label>
+                <label for="syn-state">synchronizer:</label>
+
+                <span id="ws-state" x-text="websocketState"></span>
+                <span id="store-state" x-text="storeState"></span>
+                <span id="nw-state" x-text="networkState"></span>
+                <span id="syn-state" x-text="synchronizerState"></span>
+            </header>
+            <div class="container">
+
+                <input id="new-todo" type="text" x-model="message" @keyup.enter="enter()"
+                    placeholder="Add a new todo...">
+                <ul id="todo-list">
+                    <template x-for="todo in todos">
+                        <li class="todo-item" :class="todo.isCompleted ? 'done' : ''">
+                            <span x-text="todo.description" @click="toggleState(todo)"></span>
+                            <button class="delete" @click="remove(todo)">
+                                ✕
+                            </button>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </div>
     </div>
 </body>
 

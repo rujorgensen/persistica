@@ -14,12 +14,11 @@ import {
     BehaviorSubject,
     map,
 } from 'rxjs';
-import type { TChannel, TMessage } from './shared/websocket.interfaces';
-import type { TLocalStoreState } from '../persistence.wrapper';
-import { RPCClient } from './rpc/rpc-client.class';
-import type { IRegisterFunctions } from '../network/network-host-interface.class';
-import type { TDataType } from '../synchronizer/synchronizer-state-detector.fn';
-import type { TSynchronizerState } from '../synchronizer/synchronizer';
+import type { TChannel, TMessage } from './shared/websocket.interfaces.ts';
+import type { TLocalStoreState } from '../persistence.wrapper.ts';
+import { RPCClient } from './rpc/rpc-client.class.js';
+import type { IRegisterFunctions } from '../network/network-host-interface.class.ts';
+import type { TDataType } from '../synchronizer/synchronizer-state-detector.fn.ts';
 
 export type TConnectionState = 'disconnected' | 'connecting' | 'connected';
 
@@ -42,7 +41,7 @@ export class PersisticaWebsocketClient {
     );
 
     private connectedWebSocket: WebSocket | undefined;
-    private rpcClient: RPCClient | undefined;
+    private rpcClient: RPCClient<'joinNetwork'> | undefined;
 
     constructor(
         private readonly port: number,
@@ -82,9 +81,11 @@ export class PersisticaWebsocketClient {
 
                 const webSocket = new WebSocket(`ws://localhost:${port}`);
 
-                this.rpcClient = new RPCClient(
+                const rpcClient: RPCClient<'joinNetwork'> = new RPCClient(
                     webSocket.send.bind(webSocket)
                 );
+
+                this.rpcClient = rpcClient;
 
                 webSocket.onopen = () => {
                     console.log('[WS Client] 🔌 WebSocket connection established.');
@@ -114,7 +115,7 @@ export class PersisticaWebsocketClient {
                             break;
 
                         case 'rpc-response':
-                            this.rpcClient?.handleMessage(payload);
+                            rpcClient.handleMessage(payload);
 
                             break;
 

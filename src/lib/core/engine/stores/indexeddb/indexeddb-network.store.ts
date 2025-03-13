@@ -217,11 +217,11 @@ export class IndexedDBNetworkStore {
                     const dataFrameStore = db.createObjectStore('NetworkConfigurationStore', { keyPath: 'networkId' });
                     dataFrameStore.createIndex('networkId', 'networkId', { unique: true });
 
-                    dataFrameStore.createIndex('networkKey', 'networkKey', { unique: true });
-                    dataFrameStore.createIndex('clientId', 'clientId', { unique: true });
-                    dataFrameStore.createIndex('version', 'version', { unique: true });
-                    dataFrameStore.createIndex('knownPeers', 'knownPeers', { unique: true });
-                    dataFrameStore.createIndex('deletes', 'deletes', { unique: true });
+                    dataFrameStore.createIndex('networkKey', 'networkKey', { unique: false });
+                    dataFrameStore.createIndex('clientId', 'clientId', { unique: false });
+                    dataFrameStore.createIndex('version', 'version', { unique: false });
+                    dataFrameStore.createIndex('knownPeers', 'knownPeers', { unique: false });
+                    dataFrameStore.createIndex('deletes', 'deletes', { unique: false });
                 }
 
                 // Transaction completed

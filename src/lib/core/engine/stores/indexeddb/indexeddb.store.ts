@@ -1,19 +1,19 @@
-import type { PersistenceWrapper, TLocalStoreState } from '../../persistence.wrapper';
+import type { PersistenceWrapper, TLocalStoreState } from '../../persistence.wrapper.ts';
 import {
     type Observable,
     BehaviorSubject,
     map,
 } from 'rxjs';
 import objectHash from 'object-hash';
-import { hashTables } from '../indexeddb/hash.utils';
-import { hashAll } from '../_utils/db.class';
-import type { TDateAsString } from '../../../data-types/filter.interfaces';
-import { filterNil } from '../../../../utils/rxjs';
-import type { TDataType } from '../../synchronizer/synchronizer-state-detector.fn';
-import { ListenerHandler } from '../listeners.class';
-import { IGNORED_TABLE_NAMES } from '../_utils/ignored-table-names.const';
-import type { TDataParsers, TGenericTableName, TUniqueIdentifier } from '../../_types/element.type';
-import type { TNetworkId } from '../../network/network.interfaces';
+import { hashTables } from '../indexeddb/hash.utils.js';
+import { hashAll } from '../_utils/db.class.js';
+import type { TDateAsString } from '../../../data-types/filter.interfaces.js';
+import { filterNil } from '../../../../utils/rxjs.js';
+import type { TDataType } from '../../synchronizer/synchronizer-state-detector.fn.js';
+import { ListenerHandler } from '../listeners.class.js';
+import { IGNORED_TABLE_NAMES } from '../_utils/ignored-table-names.const.js';
+import type { TDataParsers, TGenericTableName, TUniqueIdentifier } from '../../_types/element.type.js';
+import type { TNetworkId } from '../../network/network.interfaces.js';
 
 const DATABASE_NAME = 'PERSISTICA' as const;
 const DATABASE_VERSION = 1 as const;

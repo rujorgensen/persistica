@@ -17,6 +17,7 @@ export const validModelMock2: string = sanitizeString(`model YtbVideo {
     id                                              @id
     videoId                 String                  @unique
     channelDescription      String
+    watched                 Boolean                 @default(false)
     createdAt               Date                    @default(now())
     downloadState           VideoDownloadState      @default(WAITING)
     downloadPath            String

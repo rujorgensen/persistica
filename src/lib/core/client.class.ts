@@ -36,7 +36,7 @@ class DummyNetworkServer implements NetworkServer {
         ) => INetworkState,
     ): void {
 
-        console.error('onIncommingConnectionRequest not implemented should id?');
+        console.error('onIncommingConnectionRequest not implemented should it?');
     }
 
     public onEmitSynchronizationState(
@@ -44,7 +44,7 @@ class DummyNetworkServer implements NetworkServer {
             state: TSynchronizerState,
         ) => void,
     ): void {
-        console.error('onEmitSynchronizationState not implemented should id?');
+        console.error('onEmitSynchronizationState not implemented should it?');
     }
 }
 

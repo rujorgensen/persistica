@@ -1,8 +1,8 @@
 import type { Observable } from 'rxjs';
-import type { TDataType } from '../synchronizer/synchronizer-state-detector.fn';
-import type { TUniqueIdentifier } from '../_types/element.type';
-import type { TSynchronizerState } from '../synchronizer/synchronizer';
-import type { TClientId } from './network.interfaces';
+import type { TDataType } from '../synchronizer/synchronizer-state-detector.fn.ts';
+import type { TUniqueIdentifier } from '../_types/element.type.ts';
+import type { TSynchronizerState } from '../synchronizer/synchronizer.ts';
+import type { TClientId } from './network.interfaces.ts';
 
 /**
  * The interface that the server will use to register RPC functions
