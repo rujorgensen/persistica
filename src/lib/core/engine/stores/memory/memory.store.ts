@@ -147,8 +147,8 @@ export class MemoryStore<TableTypeMap, TableName extends string & keyof TableTyp
      * 
      * @returns 
      */
-    public read<TableName_ extends string & TableName, ReturnType>(
-        tableName: TableName_,
+    public read<ReturnType>(
+        tableName: TableName,
         cuid: TUniqueIdentifier,
     ): Promise<ReturnType | undefined> {
         const tableData: Set<ReturnType> | undefined = this.readAsSet().get(tableName);
@@ -156,6 +156,7 @@ export class MemoryStore<TableTypeMap, TableName extends string & keyof TableTyp
         if (tableData === undefined) {
             throw new Error(`Table "${tableName}" does not exist`);
         }
+
         const keyName: TTableDefinition = this.tables[tableName] as TTableDefinition; // TODO FIX TYPE
 
         for (const existingData of tableData) {
@@ -167,8 +168,8 @@ export class MemoryStore<TableTypeMap, TableName extends string & keyof TableTyp
         return Promise.resolve(undefined);
     }
 
-    public async readMany<TableName_ extends string & TableName, ReturnType>(
-        tableName: TableName_,
+    public async readMany<ReturnType>(
+        tableName: TableName,
     ): Promise<ReadonlyArray<ReturnType>> {
 
         const tableData: Set<ReturnType> | undefined = this.readAsSet().get(tableName);

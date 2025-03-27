@@ -40,10 +40,10 @@ class NetworkHostWebsocketInterface implements NetworkHostInterface {
             );
 
         this._wsClient
-            .onRemoteDatabaseHash(this._databaseHash$$.next);
+            .onRemoteDatabaseHash(this._databaseHash$$.next.bind(this._databaseHash$$));
 
         this.readDatabaseHash()
-            .then(this._databaseHash$$.next);
+            .then(this._databaseHash$$.next.bind(this._databaseHash$$));
 
         // * Live updates on the opposite side
         this.onCreate = this._wsClient.onCreate.bind(this._wsClient);
@@ -184,6 +184,12 @@ export class NetworkWebsocketClient implements NetworkClient {
         return this._wsCLient.disconnect();
     }
 
+    /**
+     * 
+     * @param networkState
+     * 
+     * @returns { Promise<INetworkState> }
+     */
     public joinNetwork(
         networkState: INetworkState,
     ): Promise<INetworkState> {
@@ -193,6 +199,10 @@ export class NetworkWebsocketClient implements NetworkClient {
         );
     }
 
+    /**
+     * 
+     * @returns { NetworkHostInterface }
+     */
     public getPeerInterface(
         // tableDeletes: ReadonlyArray<Readonly<ITableDeletes>>,
     ): NetworkHostInterface {

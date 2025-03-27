@@ -134,7 +134,6 @@ export class IndexedDBNetworkStore {
             const request = store.put(networkState);
 
             request.onsuccess = async () => {
-
                 const updated: INetworkState | undefined = await this.getParsedItem(networkState.networkId);
 
                 if (updated === undefined) {

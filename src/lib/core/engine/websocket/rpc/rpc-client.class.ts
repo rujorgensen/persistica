@@ -45,7 +45,7 @@ export class RPCClient<TMethods> {
     }
 
     /**
-     * Handles the response from the server.
+     * Handles the response from the RPC server.
      * 
      * @param { RPCResponse }   response
      *  

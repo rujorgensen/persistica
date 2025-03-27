@@ -1,6 +1,6 @@
-import type { TSynchronizerState } from '../synchronizer/synchronizer';
-import type { ITableDeletes, TClientId } from '../network/network.interfaces';
-import { setContainsSet } from '../../../utils/set.utils';
+import type { TSynchronizerState } from '../synchronizer/synchronizer.ts';
+import type { ITableDeletes, TClientId } from '../network/network.interfaces.ts';
+import { setContainsSet } from '../../../utils/set.utils.js';
 
 /**
  * Reacts to changes in the synchonization state.

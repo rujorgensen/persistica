@@ -121,6 +121,9 @@ export class IndexedDBStore<TableTypeMap, TableName extends string & keyof Table
         });
     }
 
+    /**
+     * 
+     */
     public async readTableHash(
         tableName: string,
     ): Promise<string | undefined> {

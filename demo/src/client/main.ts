@@ -26,11 +26,10 @@ const todo = new Todo(
 
 // Define observable component
 Alpine.data('todoApplication', () => ({
-    persistica: todo,
-    websocketState: <TConnectionState | null>'loading',// : Observable<TConnectionState>;
-    storeState: <TLocalStoreState | 'loading'>'loading',// : Observable<TLocalStoreState>;
-    networkState: <THandshakeState | 'loading'>'loading',// : Observable<THandshakeState>;
-    synchronizerState: <TSynchronizerState | 'loading'>'loading',// : Observable<TSynchronizerState>;
+    websocketState: <TConnectionState | null>'loading',
+    storeState: <TLocalStoreState | 'loading'>'loading',
+    networkState: <THandshakeState | 'loading'>'loading',
+    synchronizerState: <TSynchronizerState | 'loading'>'loading',
 
     message: '',
     todos: <ITodo[]>[],
@@ -79,7 +78,7 @@ Alpine.data('todoApplication', () => ({
             });
 
         setTimeout(() => {
-            this.persistica.joinNetwork();
+            todo.joinNetwork();
         }, 500);
     },
     enter() {

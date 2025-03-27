@@ -36,7 +36,7 @@ const watcher = watch(
             console.log('Reloading server...');
 
             // Restart server
-            server.reload(serverConf);
+            server?.reload(serverConf);
 
             // Send reload signal to clients
             console.log(`Refreshing ${clients.size} clients...`);
@@ -70,6 +70,7 @@ const buildFrontend = async () => {
 
 const serverConf = {
     port: 3000,
+    idleTimeout: 0, // Never drop the connection https://github.com/oven-sh/bun/issues/13392
     fetch: async (request: Request) => {
         const url = new URL(request.url);
         // Serve index.html for root
