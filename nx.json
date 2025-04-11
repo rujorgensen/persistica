@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "targetDefaults": {
+    "test": {
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    },
+    "link": {
+      "cache": true
+    },
+    "lint-fix": {
+      "cache": true
+    }
+  }
+}

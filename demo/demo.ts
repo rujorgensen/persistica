@@ -4,14 +4,15 @@ import { $ } from 'bun';
 const clearAndBuild = async (
 
 ) => {
-    console.log('Rebuilding...');
     // Clear dist folder
     await $`rm -rf ./demo/dist`;
 
     // Rebuild
     await buildFrontend();
-
 }
+
+let server: any;
+
 // await $`bun --hot run ./demo/server.ts`;
 // Create a Set to store all connected WebSocket clients
 const clients: Set<ReadableStreamDirectController> = new Set();
@@ -62,7 +63,7 @@ const buildFrontend = async () => {
         entrypoints: [
             './demo/src/client/index.html',
         ],
-        // sourcemap: 'inline',
+        sourcemap: 'inline',
         outdir: './demo/dist/frontend',
         minify: false,
     });

@@ -1,5 +1,5 @@
 import Alpine from 'alpinejs';
-import { Todo } from '../_persistica/client/todo.class.js';
+import { TodoApplication } from '../_persistica/client/todo.class.js';
 import {
     type CurrentNetworkStore,
     Persistica,
@@ -12,21 +12,52 @@ import type {
 import type { ITodo } from '../_persistica/todo.primitives.js';
 import type { TConnectionState } from 'src/lib/core/engine/websocket/websocket.client.js';
 import type { THandshakeState } from 'src/lib/core/engine/client/network/network.class.js';
+import { TodoApplication2 } from '../_persistica/client/todotodo.class.js';
 
 const persistica: Persistica = new Persistica();
 const currentNetworkStore: CurrentNetworkStore = persistica.getNetworkStore('ni-ZFQ9QzK9oSHpCGRU70uF8');
 const currentNetworkState: INetworkState = (await currentNetworkStore.read()) || persistica.createWorkspace('my-secret-key');
 
-const todo = new Todo(
+const todoApplication = new TodoApplication(
     currentNetworkState,
     {
         webSocketPort: 3_001,
     },
 );
 
+
+const todoApplication2 = new TodoApplication2('ni-uiodasdu8osa789');
+
+todoApplication2
+    .todoModel
+    .read$$({
+        // createdAt: {
+        //     AFTER: new Date('2023-01-01'),
+        // },
+    })
+    .subscribe({
+        next: (todos: ITodo[]) => {
+            console.log('Todos updated', todos);
+        },
+    });
+
+todoApplication2
+    .todoModel
+    .create(
+        {
+            id: `${Math.floor(Math.random() * 10000)}`,
+            title: 'Non-empty string',
+            isCompleted: false,
+            highPriority: false,
+            updatedAt: new Date(),
+            createdAt: new Date(),
+        },
+    );
+
+
 // Define observable component
 Alpine.data('todoApplication', () => ({
-    websocketState: <TConnectionState | null>'loading',
+    websocketState: 'loading',
     storeState: <TLocalStoreState | 'loading'>'loading',
     networkState: <THandshakeState | 'loading'>'loading',
     synchronizerState: <TSynchronizerState | 'loading'>'loading',
@@ -34,9 +65,7 @@ Alpine.data('todoApplication', () => ({
     message: '',
     todos: <ITodo[]>[],
     init() {
-        console.log('🚀 Todo Application is live');
-
-        todo.websocketState$$
+        todoApplication.websocketState$$
             .subscribe({
                 next: (websocketState: TConnectionState) => {
                     console.log('websocketState updated', websocketState);
@@ -44,7 +73,7 @@ Alpine.data('todoApplication', () => ({
                 },
             });
 
-        todo.storeState$$
+        todoApplication.storeState$$
             .subscribe({
                 next: (storeState: TLocalStoreState) => {
                     console.log('storeState updated', storeState);
@@ -52,7 +81,7 @@ Alpine.data('todoApplication', () => ({
                 },
             });
 
-        todo.networkState$$
+        todoApplication.networkState$$
             .subscribe({
                 next: (networkState: THandshakeState) => {
                     console.log('networkState updated', networkState);
@@ -60,7 +89,7 @@ Alpine.data('todoApplication', () => ({
                 },
             });
 
-        todo.synchronizerState$$
+        todoApplication.synchronizerState$$
             .subscribe({
                 next: (synchronizerState: TSynchronizerState) => {
                     console.log('synchronizerState updated', synchronizerState);
@@ -68,7 +97,7 @@ Alpine.data('todoApplication', () => ({
                 },
             });
 
-        todo.todoModel.read$$({
+        todoApplication.todoModel.read$$({
 
         })
             .subscribe({
@@ -78,12 +107,12 @@ Alpine.data('todoApplication', () => ({
             });
 
         setTimeout(() => {
-            todo.joinNetwork();
+            todoApplication.joinNetwork();
         }, 500);
     },
     enter() {
         if (this.message.trim() !== "") {
-            todo.todoModel.create({
+            todoApplication.todoModel.create({
                 id: Math.floor(Math.random() * 10000),
                 description: this.message.trim(),
                 isCompleted: false,
@@ -99,13 +128,13 @@ Alpine.data('todoApplication', () => ({
     remove(
         todo_: ITodo,
     ) {
-        todo.todoModel.delete(todo_.id);
+        todoApplication.todoModel.delete(todo_.id);
     },
 
     toggleState(
         todo_: ITodo,
     ) {
-        todo.todoModel.update({
+        todoApplication.todoModel.update({
             ...todo_,
             isCompleted: !todo_.isCompleted,
         })
