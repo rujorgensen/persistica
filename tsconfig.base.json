@@ -18,7 +18,7 @@
         "src/lib/core/index.ts"
       ],
       "@persistica/flux-agent": [
-        "packages/flux/agent-2/src/index.ts"
+        "packages/flux/agent/src/index.ts"
       ]
     }
   }
