@@ -1,0 +1,10 @@
+{
+    "name": "@persistica/flux/agent",
+    "version": "0.0.1",
+    "type": "module",
+    "main": "./index.cjs",
+    "types": "./index.d.ts",
+    "dependencies": {
+        "alpinejs": "^3.14.9"
+    }
+}

@@ -1,0 +1,60 @@
+{
+    "name": "flux-agent",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/flux/agent/src",
+    "projectType": "library",
+    "release": {
+        "version": {
+            "generatorOptions": {
+                "packageRoot": "dist/{projectRoot}",
+                "currentVersionResolver": "git-tag",
+                "fallbackCurrentVersionResolver": "disk"
+            }
+        }
+    },
+    "tags": [
+        "type:npm-package",
+        "scope:any"
+    ],
+    "targets": {
+        "bun-serve": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun --watch run ./apps/flux/agent/src/lib/flux.ts"
+            }
+        },
+        "madge-graph": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "npx madge --image graph.svg --extensions ts,tsx ./apps/flux/agent/src"
+            }
+        },
+        "demo": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun --watch run ./apps/flux/agent/src/demo/http.server.ts"
+            }
+        },
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/apps/flux/agent",
+                "main": "apps/flux/agent/src/index.ts",
+                "tsConfig": "apps/flux/agent/tsconfig.lib.json",
+                "assets": [],
+                "format": [
+                    "cjs"
+                ],
+                "generatePackageJson": true
+            }
+        },
+        "nx-release-publish": {
+            "options": {
+                "packageRoot": "dist/{projectRoot}"
+            }
+        }
+    }
+}

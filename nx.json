@@ -12,6 +12,24 @@
     },
     "lint-fix": {
       "cache": true
+    },
+    "@nx/esbuild:esbuild": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default"]
     }
-  }
+  },
+  "release": {
+    "version": {
+      "preVersionCommand": "bunx nx run-many -t build"
+    }
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/jest/plugin",
+      "options": {
+        "targetName": "test"
+      }
+    }
+  ]
 }
