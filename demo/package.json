@@ -11,7 +11,7 @@
     "dependencies": {
         "alpinejs": "latest",
         "fake-indexeddb": "^6.0.0",
-        "nanoid": "3.3.7",
+        "nanoid": "5.1.5",
         "object-hash": "3.0.0",
         "persistica": "link:persistica",
         "rxjs": "^7.8.2",
